@@ -1,6 +1,7 @@
 NAME	= ircserv
 
-SRCS	= srcs/main.cpp 
+SRCSDIR	= srcs/
+SRCS	= main.cpp Irc.cpp
 OBJDIR	= objs/
 OBJS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.o))
 DEPENDS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.d))
@@ -17,14 +18,14 @@ all: $(NAME)
 $(OBJDIR):
 		mkdir -p $(OBJDIR)
 
-$(OBJDIR)%.o: %.cpp
-		$(CXX) $(FLAGS) -c $< -o $@
+$(OBJDIR)%.o: $(SRCSDIR)%.cpp
+		$(CPP) $(FLAGS) -c $< -o $@
 
 $(NAME): $(OBJDIR) $(OBJS) Makefile
-	$(CXX) $(OBJS) -o $(NAME)
+	$(CPP) $(OBJS) -o $(NAME)
 
 clean:
-	${RM} $(OBJDIR)
+	${RM} $(OBJDIR) 
 
 fclean: clean
 	${RM} ${NAME}
