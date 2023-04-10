@@ -13,4 +13,6 @@ class Irc {
 	private:
 		int			_port;
 		std::string	_password;
+		//Serveur s;
+		//Client c;
 };
