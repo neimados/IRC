@@ -1,7 +1,7 @@
 NAME	= ircserv
 
 SRCSDIR	= srcs/
-SRCS	= main.cpp Irc.cpp
+SRCS	= main.cpp Irc.cpp Server.cpp
 OBJDIR	= objs/
 OBJS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.o))
 DEPENDS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.d))
