@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/15 00:01:44 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/15 00:45:30 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void Server::startSrv() {
 	
 	// Boucle principale
 	while (1) {
-		std::cout << std::endl << MAGENTA << BOLD << "Waiting for new connection..." << RESET << std::endl;
+		std::cout << std::endl << CYAN << getNumberUsers() << " connected." << BOLD << MAGENTA << " Waiting for new connection..." << RESET << std::endl;
 		std::cout << "\033[1A\033[2K";
 		
 		pollTest = poll(_fds, 1, -1);
@@ -92,7 +92,6 @@ void Server::startSrv() {
 		if (fdTest == -1)
 			throw SrvError();
 		
-		send(fdTest, WELCOME, 27, 0);
 		// close(fdTest);
 
 		struct sockaddr_in* s = (struct sockaddr_in*)&remote;
@@ -101,7 +100,55 @@ void Server::startSrv() {
 		std::cout << BLUE << BOLD << "New connection" << RESET;
 		std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
 		std::cout << " on socket " << CYAN << BOLD << fdTest << RESET << std::endl;
+
+		struct pollfd client;
+		client.fd = fdTest;
+		client.events = POLLIN | POLLOUT;
+		client.revents = 0;
+
+		User* user = new User(client, client.fd);
+		
+		user->setNickname("Anonymous");
+		
+		this->addUser(*user);
+		
+		if (!(user->getVerification())) {
+			if (checkWritable(user->getFd())) {
+				send(user->getFd(), WELCOME, 27, 0);
+			}
+		}
 	}
+}
+
+void Server::addUser(const User& user) {
+	std::cout << "Adding User " << user.getFd() << " aka `" << user.getNickname() << "` to the server." << std::endl;
+	_usrs.push_back(user);
+}
+
+int Server::getNumberUsers() const {
+	return _usrs.size();
+}
+
+int Server::checkWritable(int fd) {
+	struct pollfd pfd;
+	
+	pfd.fd = fd;
+	pfd.events = POLLOUT;
+	pfd.revents = 0;
+
+	int ret = poll(&pfd, 1, 0);
+
+	if (ret < 0) {
+		std::cout << RED << BOLD << "Error POLLOUT for User " << fd << RESET << std::endl;
+		return 0;
+	} else if (ret == 0) {
+		std::cout << RED << BOLD << "Fd " << fd << " for User not ready for writing." << RESET << std::endl;
+	}
+
+	if (pfd.revents & POLLOUT)
+		return 1;
+
+	return 0;
 }
 
 const char* Server::SrvError::what() const throw(){

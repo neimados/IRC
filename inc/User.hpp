@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/14 23:14:11 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/15 00:34:20 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ private:
     std::string whatChannel;
     int noChannels;
 
-    User(const User &u);
-    User &operator=(const User &u);
+    // User(const User &u);
+    // User &operator=(const User &u);
 
 };

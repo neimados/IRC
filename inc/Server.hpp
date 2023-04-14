@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/14 23:52:11 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/15 00:41:46 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <map>
+#include <vector>
+#include <fcntl.h>
 
 #include "User.hpp"
 
@@ -48,12 +51,20 @@
 #define REVERSE "\033[7m"
 
 
+class User;
+
 class Server {
 public:
 	Server(int port);
 	~Server();
 
 	void startSrv();
+	void addUser(const User &usr);
+
+	int checkWritable(int fd);
+
+	// Getters
+	int	getNumberUsers() const;
 
 	class SrvError : public std::exception {
 		public:
@@ -69,5 +80,6 @@ private:
 	int						_fdSrv;
 	int						_port;
 	std::string				_Port;
+	std::vector<User>		_usrs;
 
 };
