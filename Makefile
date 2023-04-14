@@ -1,7 +1,7 @@
 NAME	= ircserv
 
 SRCSDIR	= srcs/
-SRCS	= main.cpp Irc.cpp Server.cpp
+SRCS	= main.cpp Server.cpp
 OBJDIR	= objs/
 OBJS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.o))
 DEPENDS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.d))
@@ -32,5 +32,9 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+test: all
+	clear
+	./$(NAME) 6667 test
+
+.PHONY: all clean fclean re test
 -include $(DEPENDS)

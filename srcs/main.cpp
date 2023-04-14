@@ -6,11 +6,10 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:51 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/14 17:53:52 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/14 23:44:20 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/Irc.hpp"
 #include "../inc/Server.hpp"
 
 int main(int ac, char **av) {
@@ -19,21 +18,26 @@ int main(int ac, char **av) {
         return 1;
     }
 
+    int port = std::atoi(av[1]);
+
     // Gestion des signaux, de memoire :
     // signal(SIGINT, appel_de_fonction); CTRL C
     // signal(SIGTERM, appel_de_fonction); CTRL D
 
     try {
-        
+        if (port >= 0 && port <= 65535) {
+            // Parsing dans la classe IRC avec check necessaire
+            // Une grosse classe qui va contenir des objets des autres classes
+            // Irc irc(port, av[2]);
 
-        // Parsing dans la classe IRC avec check necessaire
-        // Une grosse classe qui va contenir des objets des autres classes
-        Irc irc(av[1], av[2]);
-
-        // classe serveur test
-        Server srv;
-        srv.startSrv();
-
+            // classe serveur test
+            Server srv(port);
+            
+            srv.startSrv();
+        } else {
+            std::cout << "Error: port must be between 0 and 65535" << std::endl;
+            return 1;
+        }
     } catch (std::exception &e) {
         std::cout<<e.what()<<std::endl;
         return 1;

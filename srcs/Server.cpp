@@ -6,18 +6,22 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/14 17:56:17 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/15 00:01:44 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
 
-Server::Server(){
+Server::Server(int port) {
 	_fds = new struct pollfd[10];
 	_fdSrv = 0;
+	_port = port;
 
-	std::string Port = "6666";
-
+	std::stringstream ss;
+    ss << _port;
+	
+	_Port = ss.str();
+	
 	int yes = 1;
 
 	struct addrinfo hint, *serverinfo, *tmp;
@@ -28,7 +32,7 @@ Server::Server(){
 	hint.ai_socktype = SOCK_STREAM;
 	hint.ai_protocol = getprotobyname("TCP")->p_proto;
 
-	if (getaddrinfo("0.0.0.0", Port.c_str(), &hint, &serverinfo) != 0) {
+	if (getaddrinfo("0.0.0.0", _Port.c_str(), &hint, &serverinfo) != 0) {
 		throw SrvError();
 	}
 
@@ -58,24 +62,45 @@ Server::Server(){
 	_fds[0].events = POLLIN;
 }
 
-Server::~Server(){}
+Server::~Server(){
+	delete[] _fds;
+	close(_fdSrv);
+}
 
 void Server::startSrv() {
-	int pollTest, fdTest = 0;
+	int pollTest = 0;
+	int fdTest = 0;
 	struct sockaddr_storage	remote;
 	socklen_t				addrlen;
 
+	std::cout << GREEN << ITALIC << "Listening on port " << BOLD << _Port << RESET << std::endl;
+	std::cout << "Try `" << BOLD << "nc 127.0.0.1 " << _Port << "`" << RESET << std::endl;
+	
 	// Boucle principale
 	while (1) {
-		std::cout << "Listening on port 6666. Essayez nc 127.0.0.1 6666" << std::endl;
+		std::cout << std::endl << MAGENTA << BOLD << "Waiting for new connection..." << RESET << std::endl;
+		std::cout << "\033[1A\033[2K";
+		
 		pollTest = poll(_fds, 1, -1);
 
 		if (pollTest == -1)
 			throw SrvError();
-	
+
 		addrlen = sizeof remote;
 		fdTest = accept(_fds[0].fd, (struct sockaddr*)&remote, &addrlen);
-		send(fdTest, "coucou 42", 9, 0);
+		
+		if (fdTest == -1)
+			throw SrvError();
+		
+		send(fdTest, WELCOME, 27, 0);
+		// close(fdTest);
+
+		struct sockaddr_in* s = (struct sockaddr_in*)&remote;
+		char ip_str[INET_ADDRSTRLEN];
+
+		std::cout << BLUE << BOLD << "New connection" << RESET;
+		std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
+		std::cout << " on socket " << CYAN << BOLD << fdTest << RESET << std::endl;
 	}
 }
 
