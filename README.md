@@ -1,12 +1,9 @@
-# IRC
-42 irc
-
-# Exemple of launch
-- Run: make test
+# Run:
+- make test
 OR
-- Run: make <port> <password>
+- make && ./ircserv <port> <password>
 
-# Exemple of use (in other terminal)
+# Example of use (in other terminal)
 - Run: nc 127.0.0.1 6667
 
 # Ressources
