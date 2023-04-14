@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/14 17:53:07 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/14 17:56:17 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,11 +58,6 @@ Server::Server(){
 	_fds[0].events = POLLIN;
 }
 
-Server::Server(const Server &srv){
-	*this = srv;
-}
-
-
 Server::~Server(){}
 
 void Server::startSrv() {
@@ -70,7 +65,7 @@ void Server::startSrv() {
 	struct sockaddr_storage	remote;
 	socklen_t				addrlen;
 
-	//boucle principale
+	// Boucle principale
 	while (1) {
 		std::cout << "Listening on port 6666. Essayez nc 127.0.0.1 6666" << std::endl;
 		pollTest = poll(_fds, 1, -1);

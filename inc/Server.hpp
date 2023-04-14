@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/14 17:53:10 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/14 17:56:00 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ class Server {
 	public:
 		Server();
 		~Server();
-		Server(const Server &srv);
 
 		void startSrv();
 
