@@ -1,6 +1,6 @@
 # Run:
 - make test
-OR
+- Or
 - make && ./ircserv <port> <password>
 
 # Example of use (in other terminal)
