@@ -59,7 +59,8 @@ public:
 	~Server();
 
 	void startSrv();
-	void addUser(const User &usr);
+	void addUser();
+	void cmdUser(int fd);
 
 	int checkWritable(int fd);
 
@@ -71,14 +72,15 @@ public:
 			virtual const char* what() const throw();
 	};
 
-
 private:
+	Server();
 	Server(Server const &srv);
 	Server &operator= (Server const &srv);
 
 	struct pollfd			*_fds;
 	int						_fdSrv;
 	int						_port;
+	int						_nbUsers;
 	std::string				_Port;
 	std::vector<User>		_usrs;
 

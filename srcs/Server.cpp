@@ -15,6 +15,7 @@
 Server::Server(int port) {
 	_fds = new struct pollfd[10];
 	_fdSrv = 0;
+	_nbUsers = 1;
 	_port = port;
 
 	std::stringstream ss;
@@ -22,7 +23,7 @@ Server::Server(int port) {
 	
 	_Port = ss.str();
 	
-	int yes = 1;
+	int optval = 1;
 
 	struct addrinfo hint, *serverinfo, *tmp;
 
@@ -38,12 +39,12 @@ Server::Server(int port) {
 
 	for (tmp = serverinfo; tmp != NULL; tmp = tmp->ai_next)
 	{
-		_fdSrv= socket(tmp->ai_family, tmp->ai_socktype, tmp->ai_protocol);
+		_fdSrv = socket(tmp->ai_family, tmp->ai_socktype, tmp->ai_protocol);
 
 		if (_fdSrv < 0)
 			continue;
 
-		setsockopt(_fdSrv, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+		setsockopt(_fdSrv, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
 		if (bind(_fdSrv, tmp->ai_addr, tmp->ai_addrlen) < 0)
 		{
@@ -55,7 +56,7 @@ Server::Server(int port) {
 
 	freeaddrinfo(serverinfo);
 
-	if (listen(_fdSrv, 10) == -1)
+	if (listen(_fdSrv, 10) == -1 || !tmp)
 		throw SrvError();
 
 	_fds[0].fd = _fdSrv;
@@ -69,60 +70,68 @@ Server::~Server(){
 
 void Server::startSrv() {
 	int pollTest = 0;
-	int fdTest = 0;
-	struct sockaddr_storage	remote;
-	socklen_t				addrlen;
 
 	std::cout << GREEN << ITALIC << "Listening on port " << BOLD << _Port << RESET << std::endl;
 	std::cout << "Try `" << BOLD << "nc 127.0.0.1 " << _Port << "`" << RESET << std::endl;
 	
 	// Boucle principale
 	while (1) {
-		std::cout << std::endl << CYAN << getNumberUsers() << " connected." << BOLD << MAGENTA << " Waiting for new connection..." << RESET << std::endl;
+		std::cout << std::endl << CYAN << _nbUsers - 1 << " connected." << BOLD << MAGENTA << " Waiting for new connection..." << RESET << std::endl;
 		std::cout << "\033[1A\033[2K";
 		
-		pollTest = poll(_fds, 1, -1);
+		pollTest = poll(_fds, _nbUsers, -1);
 
 		if (pollTest == -1)
 			throw SrvError();
-
-		addrlen = sizeof remote;
-		fdTest = accept(_fds[0].fd, (struct sockaddr*)&remote, &addrlen);
-		
-		if (fdTest == -1)
-			throw SrvError();
-		
-		// close(fdTest);
-
-		struct sockaddr_in* s = (struct sockaddr_in*)&remote;
-		char ip_str[INET_ADDRSTRLEN];
-
-		std::cout << BLUE << BOLD << "New connection" << RESET;
-		std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
-		std::cout << " on socket " << CYAN << BOLD << fdTest << RESET << std::endl;
-
-		struct pollfd client;
-		client.fd = fdTest;
-		client.events = POLLIN | POLLOUT;
-		client.revents = 0;
-
-		User* user = new User(client, client.fd);
-		
-		user->setNickname("Anonymous");
-		
-		this->addUser(*user);
-		
-		if (!(user->getVerification())) {
-			if (checkWritable(user->getFd())) {
-				send(user->getFd(), WELCOME, 27, 0);
+		for (int i = 0; i < _nbUsers; i++) {
+			if (_fds[i].revents & POLLIN)
+			{
+				if (_fds[i].fd == _fdSrv)
+					addUser(); // New user
+				else
+					cmdUser(i); // recup la commande de l'user deja chez nous
 			}
 		}
 	}
 }
 
-void Server::addUser(const User& user) {
-	std::cout << "Adding User " << user.getFd() << " aka `" << user.getNickname() << "` to the server." << std::endl;
-	_usrs.push_back(user);
+void Server::addUser() {
+	struct sockaddr_storage	remote;
+	socklen_t				addrlen;
+	int						fd;
+
+	addrlen = sizeof remote;
+	fd = accept(_fdSrv, (struct sockaddr*)&remote, &addrlen);
+	if (fd == -1)
+		throw SrvError();
+
+	struct sockaddr_in* s = (struct sockaddr_in*)&remote;
+	char ip_str[INET_ADDRSTRLEN];
+
+	std::cout << BLUE << BOLD << "New connection" << RESET;
+	std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
+	std::cout << " on socket " << CYAN << BOLD << fd << RESET << std::endl;
+
+	struct pollfd client;
+	client.fd = fd;
+	client.events = POLLIN | POLLOUT;
+	client.revents = 0;
+	_fds[_nbUsers].fd = fd;
+	_fds[_nbUsers].events = POLLIN;
+
+	User* user = new User(client, client.fd);
+		
+	user->setNickname("Anonymous");
+
+	std::cout << "Adding User " << user->getFd() << " aka `" << user->getNickname() << "` to the server." << std::endl;
+	_usrs.push_back(*user);
+	_nbUsers++;
+
+	if (!(user->getVerification())) {
+		if (checkWritable(user->getFd())) {
+			send(user->getFd(), WELCOME, 27, 0);
+		}
+	}
 }
 
 int Server::getNumberUsers() const {
@@ -149,6 +158,34 @@ int Server::checkWritable(int fd) {
 		return 1;
 
 	return 0;
+}
+
+void	Server::cmdUser(int fd){
+	int							len = 1024;
+	char						buf[len];
+	std::vector<User>::iterator it;
+
+	if (recv(_fds[fd].fd, buf, len, 0) <= 0) {
+		//connection closed
+		std::cout<<"Client disconnected !"<<std::endl;
+		close (_fds[fd].fd);
+		_fds[fd] = _fds[_nbUsers -1];
+		it = _usrs.begin();
+		while (it != _usrs.end()){
+			if (it->getFd() == fd)
+				_usrs.erase(it);
+			it++;
+		}
+		_nbUsers--;
+	}
+	else {
+		std::string cmd(buf, strlen(buf) - 1);
+		std::cout<<"CMD: "<<cmd<<std::endl;
+		//on parse la commande et on execute
+		//a refaire, je recupere que 1024 mais faudra faire un truc genre gnl
+	}
+	memset(&buf, 0, len);//reset du buffer
+
 }
 
 const char* Server::SrvError::what() const throw(){

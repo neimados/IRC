@@ -65,6 +65,7 @@ private:
     std::string _username;
     std::string _nickname;
     std::string _password;
+    std::string _cmd;
 
     bool        isVerified;
     bool        userIsVerified;
