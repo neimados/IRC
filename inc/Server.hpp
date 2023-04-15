@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/15 00:41:46 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/15 22:02:59 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,14 @@
 
 // Const defines
 #define WELCOME "Welcome to the IRC server!\n"
+#define PROMPT "$IRC> "
 
 // Defines colors
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
 #define BLUE "\033[0;34m"
 #define MAGENTA "\033[0;35m"
+#define YELLOW "\033[0;33m"
 #define CYAN "\033[0;36m"
 #define WHITE "\033[0;37m"
 #define RESET "\033[0m"

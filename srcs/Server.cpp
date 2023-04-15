@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/15 00:45:30 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/15 22:08:55 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,11 +72,12 @@ void Server::startSrv() {
 	int pollTest = 0;
 
 	std::cout << GREEN << ITALIC << "Listening on port " << BOLD << _Port << RESET << std::endl;
-	std::cout << "Try `" << BOLD << "nc 127.0.0.1 " << _Port << "`" << RESET << std::endl;
+	std::cout << "Try `" << BOLD << "nc 127.0.0.1 " << _Port << "`" << RESET << std::endl << std::endl;
 	
 	// Boucle principale
 	while (1) {
 		std::cout << std::endl << CYAN << _nbUsers - 1 << " connected." << BOLD << MAGENTA << " Waiting for new connection..." << RESET << std::endl;
+		std::cout << "\033[1A\033[2K";
 		std::cout << "\033[1A\033[2K";
 		
 		pollTest = poll(_fds, _nbUsers, -1);
@@ -102,13 +103,14 @@ void Server::addUser() {
 
 	addrlen = sizeof remote;
 	fd = accept(_fdSrv, (struct sockaddr*)&remote, &addrlen);
+
 	if (fd == -1)
 		throw SrvError();
 
 	struct sockaddr_in* s = (struct sockaddr_in*)&remote;
 	char ip_str[INET_ADDRSTRLEN];
 
-	std::cout << BLUE << BOLD << "New connection" << RESET;
+	std::cout << std::endl << BLUE << BOLD << "New connection" << RESET;
 	std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
 	std::cout << " on socket " << CYAN << BOLD << fd << RESET << std::endl;
 
@@ -123,13 +125,14 @@ void Server::addUser() {
 		
 	user->setNickname("Anonymous");
 
-	std::cout << "Adding User " << user->getFd() << " aka `" << user->getNickname() << "` to the server." << std::endl;
+	std::cout << "Adding User " << user->getFd() << " aka `" << user->getNickname() << "` to the server." << std::endl << std::endl;
 	_usrs.push_back(*user);
 	_nbUsers++;
 
 	if (!(user->getVerification())) {
 		if (checkWritable(user->getFd())) {
 			send(user->getFd(), WELCOME, 27, 0);
+			send(user->getFd(), PROMPT, 6, 0);
 		}
 	}
 }
@@ -162,15 +165,21 @@ int Server::checkWritable(int fd) {
 
 void	Server::cmdUser(int fd){
 	int							len = 1024;
+	int							client;
 	char						buf[len];
 	std::vector<User>::iterator it;
 
-	if (recv(_fds[fd].fd, buf, len, 0) <= 0) {
-		//connection closed
-		std::cout<<"Client disconnected !"<<std::endl;
-		close (_fds[fd].fd);
+	client = _fds[fd].fd;
+	send(client, PROMPT, 6, 0);
+
+	if (recv(client, buf, len, 0) <= 0) {
+		// Connection closed
+		std::cout << std::endl << YELLOW << "Client " << BOLD << client << NORMAL " disconnected!" << RESET << std::endl;
+		close(client);
+		
 		_fds[fd] = _fds[_nbUsers -1];
 		it = _usrs.begin();
+		
 		while (it != _usrs.end()){
 			if (it->getFd() == fd)
 				_usrs.erase(it);
@@ -180,7 +189,7 @@ void	Server::cmdUser(int fd){
 	}
 	else {
 		std::string cmd(buf, strlen(buf) - 1);
-		std::cout<<"CMD: "<<cmd<<std::endl;
+		std::cout << BOLD "User " << client << ": " << RESET <<cmd<<std::endl;
 		//on parse la commande et on execute
 		//a refaire, je recupere que 1024 mais faudra faire un truc genre gnl
 	}
