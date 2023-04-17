@@ -6,11 +6,36 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:51 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/14 23:44:20 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/17 22:05:00 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+
+// Function to catch ctrl + c
+void    sigint_handler(int sig)
+{
+    (void)sig;
+    
+    std::cout << std::endl << ORANGE << BOLD;
+    std::cout << "Stop listenning, close IRC.";
+    std::cout << RESET << std::endl;
+    exit(0);
+}
+
+// Function to catch ctrl + d
+void    sigterm_handler(int sig)
+{
+    (void)sig;
+
+    // Clear console
+    std::cout << "\033[2J\033[1;1H";
+    
+    std::cout << std::endl << GREY << ITALIC;
+    std::cout << "IRC terminal was cleared.";
+    std::cout << RESET << std::endl;
+    exit(0);
+}
 
 int main(int ac, char **av) {
     if (ac != 3 || !av[1][0] || !av[2][0]) {
@@ -20,9 +45,11 @@ int main(int ac, char **av) {
 
     int port = std::atoi(av[1]);
 
-    // Gestion des signaux, de memoire :
-    // signal(SIGINT, appel_de_fonction); CTRL C
-    // signal(SIGTERM, appel_de_fonction); CTRL D
+    // Catch ctrl + c
+    signal(SIGINT, sigint_handler);
+    // Catch ctrl + d
+    signal(SIGTERM, sigterm_handler);
+    
 
     try {
         if (port >= 0 && port <= 65535) {

@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/15 00:34:20 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/18 00:38:13 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ class User {
 
 public:
     User();
-    User(pollfd Client, int fd);
+    User(pollfd Client, int fd, int socket);
     ~User();
     
     User    USER(std::string username);
@@ -32,14 +32,16 @@ public:
     std::string getPassword() const;
 
     int     getFd() const;
+    int     getSocket() const;
     bool    getVerification();
     bool    getUserVerification();
-    bool    getNickVerification();
     bool    getChannelVerification();
 
     pollfd  getPollFd();
     int     getisInChannel();
     std::string getWhatChannel() const;
+
+    void sendPrompt();
     
     // Setters
     void    setNickname(std::string nickname);
@@ -48,7 +50,6 @@ public:
     void    setPort(int fd);
     void    setVerification(bool type);
     void    setUserVerification(bool type);
-    void    setNickVerification(bool type);
     void    setChannelVerification(bool type);
     void    setisInChannel(int n);
     void    setWhatChannel(std::string channelName);
@@ -62,6 +63,7 @@ public:
 private:
     pollfd      _client;
     int         _fd;
+    int         _socket;
     std::string _username;
     std::string _nickname;
     std::string _password;
@@ -69,7 +71,6 @@ private:
 
     bool        isVerified;
     bool        userIsVerified;
-    bool        nickIsVerified;
     bool        isInChannel;
 
     std::string whatChannel;

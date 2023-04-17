@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/15 00:33:56 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/18 00:38:20 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 User::User() {}
 User::~User() {}
 
-User::User(pollfd Client, int fd) {
+User::User(pollfd Client, int fd, int socket) {
     this->_fd = fd;
+    this->_socket = socket;
     this->isVerified = false;
     this->userIsVerified = false;
-    this->nickIsVerified = false;
     this->isInChannel = false;
     this->noChannels = 0;
     this->_client = Client;
@@ -31,16 +31,6 @@ User User::USER(std::string username) {
     
     send(this->getFd(), "\nUsername set to ", 18, 0);
     send(this->getFd(), this->getUsername().data(), username.size(), 0);
-    send(this->getFd(), "\n", 2, 0);
-    return (*this);
-}
-
-User    User::NICK(std::string nickname) {
-    this->setNickname(nickname.substr(0, nickname.size()));
-    this->setNickVerification(1);
-    
-    send(this->getFd(), "\nNickname set to ", 17, 0);
-    send(this->getFd(), this->getNickname().data(), nickname.size(), 0);
     send(this->getFd(), "\n", 2, 0);
     return (*this);
 }
@@ -59,14 +49,14 @@ std::string User::getPassword() const {
 int     User::getFd() const {
     return this->_fd;
 }
+int     User::getSocket() const {
+    return this->_socket;
+}
 bool    User::getVerification() {
     return this->isVerified;
 }
 bool    User::getUserVerification() {
     return this->userIsVerified;
-}
-bool    User::getNickVerification() {
-    return this->nickIsVerified;
 }
 bool    User::getChannelVerification() {
     return this->isInChannel;
@@ -101,9 +91,6 @@ void    User::setVerification(bool type) {
 void    User::setUserVerification(bool type) {
     this->userIsVerified = type;
 }
-void    User::setNickVerification(bool type) {
-    this->nickIsVerified = type;
-}
 void    User::setChannelVerification(bool type) {
     this->isInChannel = type;
 }
@@ -112,6 +99,21 @@ void    User::setisInChannel(int n) {
 }
 void    User::setWhatChannel(std::string channelName) {
     this->whatChannel = channelName;
+}
+
+void User::sendPrompt() {
+    std::string nick;
+			
+    nick += "";
+    nick += GREEN;
+    nick += ITALIC;
+    nick += this->getNickname();
+    nick += RESET;
+    nick += " $> ";
+    
+    const void *nickanme = nick.c_str();
+    const size_t nickname_len = nick.length();
+    send(this->getFd(), nickanme, nickname_len, 0);
 }
 
 // Commands

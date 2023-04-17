@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/15 22:02:59 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/18 00:18:41 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,14 @@
 
 // Const defines
 #define WELCOME "Welcome to the IRC server!\n"
-#define PROMPT "$IRC> "
+#define PROMPT "$irc> "
+#define MAX_CLIENTS 10
+#define MAX_BUFFER 1024
+#define NICKNAME_ALREADY_USED "\033[0;31mError:\033[0m Nickname already in use.\n"
+#define NICKNAME_NOT_FOUND "\033[0;31mError:\033[0m <nickname> not found.\n"
+#define NICKNAME_TOO_LONG "\033[0;31mError:\033[0m Nickname too long.\n"
+#define NICKNAME_FORMAT "\033[0;31mError:\033[0m Nickname must contain only letters, numbers and underscores.\n"
+#define USE_HELP "\033[0;31mError:\033[0m Command not found.\n\rUse /HELP to see the list of available commands.\n"
 
 // Defines colors
 #define RED "\033[0;31m"
@@ -42,6 +49,8 @@
 #define MAGENTA "\033[0;35m"
 #define YELLOW "\033[0;33m"
 #define CYAN "\033[0;36m"
+#define ORANGE "\033[0;33m"
+#define GREY "\033[0;37m"
 #define WHITE "\033[0;37m"
 #define RESET "\033[0m"
 
@@ -51,7 +60,6 @@
 #define NORMAL "\033[22m"
 #define UNDERLINE "\033[4m"
 #define REVERSE "\033[7m"
-
 
 class User;
 
@@ -68,8 +76,27 @@ public:
 
 	// Getters
 	int	getNumberUsers() const;
+	User *getUser(int fd);
+	std::string getTime() const;
+
+	// Supported commands
+	void cmdNick(User *user, std::string cmd);
+	void cmdHelp(User *user);
+	// void cmdUser(User *user, std::string &cmd);
+	void cmdList(User *user);
+	// void cmdJoin(User *user, std::string &cmd);
+	// void cmdPart(User *user, std::string &cmd);
+	// void cmdNames(User *user, std::string &cmd);
+	// void cmdPrivmsg(User *user, std::string &cmd);
+	// void cmdQuit(User *user, std::string &cmd);
+	
 
 	class SrvError : public std::exception {
+		public:
+			virtual const char* what() const throw();
+	};
+
+	class SrvErrorClient : public std::exception {
 		public:
 			virtual const char* what() const throw();
 	};
