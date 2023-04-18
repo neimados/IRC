@@ -100,6 +100,7 @@ void Server::addUser() {
 	struct sockaddr_storage	remote;
 	socklen_t				addrlen;
 	int						fd;
+	std::stringstream 		ss;
 
 	addrlen = sizeof remote;
 	fd = accept(_fdSrv, (struct sockaddr*)&remote, &addrlen);
@@ -120,7 +121,8 @@ void Server::addUser() {
 	User* user = new User(client, client.fd, fd);
 
 	std::string nickname = "User_";
-	nickname += std::to_string(fd);
+	ss << fd;
+	nickname += ss.str();
 		
 	user->setNickname(nickname);
 
@@ -293,7 +295,7 @@ void Server::cmdNick(User *user, std::string cmd) {
 			break;
 	}
 
-	for (size_t i = cmd.size() - 1; i >= 0; i--) {
+	for (int i = cmd.size() - 1; i >= 0; i--) {
 		if (cmd[i] == ' ') {
 			cmd.erase(i, 1);
 			i--;
