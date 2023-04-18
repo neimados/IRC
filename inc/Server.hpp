@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 23:47:02 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/19 00:23:05 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,6 @@ public:
 
 	// Supported commands
 	void cmdNick(User *user, std::string cmd);
-	void cmdHelp(User *user);
 	void cmdUser(User *user, std::string cmd);
 	void cmdList(User *user);
 	// void cmdJoin(User *user, std::string &cmd);
@@ -114,5 +113,6 @@ private:
 	int						_nbUsers;
 	std::string				_Port;
 	std::vector<User>		_usrs;
+	std::vector<User>		_chans; // Update User to Chanel
 
 };

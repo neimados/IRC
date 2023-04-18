@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 23:59:07 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/19 00:23:13 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,31 +281,27 @@ std::string Server::getTime() const {
 // ========= Supported commands =========
 void Server::execCmd(User *user, std::string cmd) {
 	std::cout <<  BOLD << user->getNickname() << ": " << RESET << cmd <<std::endl;
+	
 	if (cmd.substr(0, 4) == "NICK") {
 		this->cmdNick(user, cmd);
-		// user->sendPrompt();
 	} else if (cmd.substr(0, 4) == "USER") {
 		this->cmdUser(user, cmd);
-		// user->sendPrompt();
 	} else if (cmd.substr(0, 3) == "CAP") {
 		std::cout <<  CYAN << ITALIC << "CAP command called." << RESET << std::endl << std::endl;
-	} else if (cmd.substr(0, 3) == "PING") {
+	} else if (cmd.substr(0, 4) == "PING") {
 		std::cout <<  CYAN << ITALIC << "PING command called." << RESET << std::endl << std::endl;
+		sentUser(user, "PONG");
 	} else if (cmd.substr(0, 4) == "LIST") {
 		std::cout <<  CYAN << ITALIC << "Showing users and channels." << RESET << std::endl << std::endl;
 		this->cmdList(user);
-		user->sendPrompt();
 	} else if (cmd.substr(0, 4) == "QUIT") {
 		std::cout <<  "Command QUIT received from " << BOLD << user->getNickname() << RESET << std::endl;
-		std::cout <<  "Leaving server..." << std::endl;
-		
-		// Connection closed
-		// std::cout << std::endl <<  YELLOW << "Client " << BOLD << nickname << NORMAL " on socket " << ITALIC << socket << RESET << YELLOW << " disconnected!" << RESET << std::endl;
-		// close(user->getFd());
+	} else if (cmd.substr(0, 4) == "JOIN") {
+		std::cout <<  CYAN << ITALIC << "JOIN command called." << RESET << std::endl << std::endl;
+		sentUser(user, "Join channel `" + cmd.substr(5) + "`. (non en vrai ça ne fait rien)");
 	} else {
 		std::cout <<  RED << BOLD << "Command not found." << RESET << std::endl << std::endl;
-		send(user->getFd(), USE_HELP, sizeof(USE_HELP), 0);
-		user->sendPrompt();
+		sentUser(user, "Command not found.");
 	}
 }
 
@@ -398,104 +394,42 @@ void Server::cmdUser(User *user, std::string cmd) {
 	(void)user;
 	(void)cmd;
 	std::cout <<  CYAN << ITALIC << "USER command called." << RESET << std::endl << std::endl;
-}
-
-void Server::cmdHelp(User *user) {
-	std::string HELP = "";
-
-	HELP += "\n\r";
-	HELP += BLUE;
-	HELP += BOLD;
-	HELP += "Available commands:";
-	HELP += RESET;
-
-	HELP += "\n\r";
-	HELP += BOLD;
-	HELP += "  /NICK <nickname> : ";
-	HELP += RESET;
-	HELP += "Change your nickname";
-
-	HELP += "\n\r";
-	HELP += BOLD;
-	HELP += "  /JOIN <channel> : ";
-	HELP += RESET;
-	HELP += "Join a channel";
-
-	HELP += "\n\r";
-	HELP += BOLD;
-	HELP += "  /MSG <message> : ";
-	HELP += RESET;
-	HELP += "Send a message to the channel";
-
-	HELP += "\n\r";
-	HELP += BOLD;
-	HELP += "  /LIST : ";
-	HELP += RESET;
-	HELP += "List channels and users";
-
-	HELP += "\n\r";
-	HELP += BOLD;
-	HELP += "  /PART : ";
-	HELP += RESET;
-	HELP += "Leave the channel";
-
-	HELP += "\n\r";
-	HELP += BOLD;
-	HELP += "  /QUIT : ";
-	HELP += RESET;
-	HELP += "Leave the server";
-
-	HELP += "\n\r";
-	HELP += BOLD;
-	HELP += "  /HELP : ";
-	HELP += RESET;
-	HELP += "Display this help";
-	
-	
-	HELP += "\n\r";
-	HELP += "\n\r";
-	// Send the help message to the client
-	send(user->getFd(), (void *)HELP.c_str(), HELP.size(), 0);
+	sentUser(user, "User updated.");
 }
 
 void Server::cmdList(User *user) {
-	std::string LIST = "";
-
-	LIST += "\n\r";
-	LIST += BLUE;
-	LIST += BOLD;
-	LIST += "Users:\n\r";
-	LIST += RESET;
+	std::string usrs = "Users: ";
+	std::string chans = "Channels: ";
 
 	std::vector<User>::iterator it = _usrs.begin();
+	std::vector<User>::iterator it2 = _chans.begin();
+	
 	while (it != _usrs.end()) {
-		LIST += "  - ";
-		LIST += it->getNickname();
-		LIST += "\n\r";
+		usrs += it->getNickname();
+		
+		if (it + 1 != _usrs.end())
+			usrs += ", ";
 		it++;
 	}
 
-	LIST += "\n\r";
-	LIST += "\n\r";
+	if (_usrs.size() == 0)
+		usrs += "none";
 
-	LIST += ORANGE;
-	LIST += BOLD;
-	LIST += "Channels: none\n\r";
-	LIST += RESET;
+	while (it2 != _chans.end()) {
+		chans += it2->getNickname(); // Update to get channel name
+		
+		if (it2 + 1 != _chans.end())
+			chans += ", ";
+		it2++;
+	}
 
-	// std::vector<User>::iterator it = _usrs.begin();
-	// while (it != _usrs.end()) {
-	// 	LIST += "  - ";
-	// 	LIST += it->getNickname();
-	// 	LIST += "\n\r";
-	// 	it++;
-	// }
+	if (_chans.size() == 0)
+		chans += "none";
 
-	LIST += "\n\r";
-	
-	// Send the list to the client
-	send(user->getFd(), (void *)LIST.c_str(), LIST.size(), 0);
+	sentUser(user, usrs);
+	sentUser(user, chans);
 }
+
 // ========= Exceptions ==========
 
 const char* Server::SrvError::what() const throw(){
