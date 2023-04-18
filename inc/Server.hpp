@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 13:21:13 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/18 23:47:02 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ public:
 	void	addUser();
 	void	cmdUser(int fd);
 	void	execCmd(User *user, std::string cmd);
+	void	sentUser(User *user, std::string msg);
 
 	int checkWritable(int fd);
 

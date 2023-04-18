@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 13:31:37 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/18 23:59:07 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,15 +128,14 @@ void Server::addUser() {
 
 	std::cout << std::endl <<  BLUE << BOLD << "New connection" << RESET << " of " << ITALIC << CYAN << user->getNickname() << RESET;
 	std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
-	std::cout << " on socket " << CYAN << BOLD << fd << RESET << std::endl;
+	std::cout << " on socket " << CYAN << BOLD << fd << RESET << " at " << this->getTime() << std::endl;
 
 	_usrs.push_back(*user);
 	_nbUsers++;
 
 	std::string msg = ":";
 	
-	msg += "IRC";
-	msg += " 001 ";
+	msg = ":IRC 001 yo";
 	msg += nickname;
 	msg += " :Welcome ";
 	msg += nickname;
@@ -199,7 +198,7 @@ void	Server::cmdUser(int fd){
 
 	if (recv(clientFd, buf, MAX_BUFFER, 0) <= 0) {
 		// Connection closed
-		std::cout << std::endl <<  YELLOW << "Client " << BOLD << nickname << NORMAL " on socket " << ITALIC << socket << RESET << YELLOW << " disconnected!" << RESET << std::endl;
+		std::cout << std::endl <<  YELLOW << "Client " << BOLD << nickname << NORMAL " on socket " << ITALIC << socket << RESET << YELLOW << " disconnected at " << this->getTime() << RESET << std::endl;
 		close(clientFd);
 		
 		_fds[fd] = _fds[_nbUsers -1];
@@ -214,20 +213,42 @@ void	Server::cmdUser(int fd){
 	}
 	else {
 		std::string cmd(buf);
-		std::string delimiter = "\n";
-		
-		cmd = cmd.substr(0, cmd.size() - 1);
 
-		size_t pos = 0;
-		std::string token;
-		while ((pos = cmd.find(delimiter)) != std::string::npos) {
-			token = cmd.substr(0, pos);
-			execCmd(user, token);
-			cmd.erase(0, pos + delimiter.length());
+		if (cmd.find("\n") != std::string::npos) {
+			std::string delimiter = "\n";
+			size_t pos = 0;
+			std::string token;
+			
+			// cmd = cmd.substr(0, cmd.size() - 1);
+			
+			while ((pos = cmd.find(delimiter)) != std::string::npos) {
+				token = cmd.substr(0, pos);
+				execCmd(user, token);
+				cmd.erase(0, pos + delimiter.length());
+			}
+		} else {
+			execCmd(user, cmd);
 		}
 	}
 	
 	memset(&buf, 0, MAX_BUFFER); // Reset du buffer
+}
+
+void Server::sentUser(User *user, std::string msg) {
+	std::string start = ":IRC 001 ";
+	start += user->getNickname();
+	start += " :";
+
+	msg = start + msg + "\n\r";
+	
+	const void *cmsg = msg.c_str();
+
+	if (!(user->getVerification())) {
+		if (checkWritable(user->getFd())) {
+			send(user->getFd(), cmsg, msg.size(), 0);
+			// user->sendPrompt();
+		}
+	}
 }
 
 User *Server::getUser(int fd) {
@@ -252,7 +273,7 @@ std::string Server::getTime() const {
 	strftime (buffer,8,"%Hh%Mm%S",timeinfo);
 	
 	std::string str(buffer);
-	str += " ";
+	str.erase(str.size() - 1);
 	return str;
 }
 
@@ -309,8 +330,8 @@ void Server::cmdNick(User *user, std::string cmd) {
 
 	if (cmd.size() <= 4) {
 		std::cout <<  RED << BOLD << "<nickname> not found." << RESET << std::endl << std::endl;
-		send(user->getFd(), NICKNAME_NOT_FOUND, sizeof(NICKNAME_NOT_FOUND), 0);
-		user->sendPrompt();
+		sentUser(user, NICKNAME_NOT_FOUND);
+		// user->sendPrompt();
 		return;
 	}
 	
@@ -331,8 +352,8 @@ void Server::cmdNick(User *user, std::string cmd) {
 
 	if (new_nickname.size() == 0) {
 		std::cout <<  RED << BOLD << "Nickname is not valid." << RESET << std::endl << std::endl;
-		send(user->getFd(), NICKNAME_FORMAT, sizeof(NICKNAME_FORMAT), 0);
-		user->sendPrompt();
+		sentUser(user, NICKNAME_FORMAT);
+		// user->sendPrompt();
 		new_nickname.clear();
 		return;
 	}
@@ -341,10 +362,7 @@ void Server::cmdNick(User *user, std::string cmd) {
 	for (size_t i = 0; i < new_nickname.size(); i++) {
 		if (!isalnum(new_nickname[i]) && new_nickname[i] != '_') {
 			std::cout <<  RED << BOLD << "Nickname contains invalid characters : '" << new_nickname[i] << "'" << RESET << std::endl << std::endl;
-			
-			send(user->getFd(), NICKNAME_FORMAT, sizeof(NICKNAME_FORMAT), 0);
-			
-			user->sendPrompt();
+			sentUser(user, NICKNAME_FORMAT);
 			new_nickname.clear();
 			return;
 		}
@@ -352,10 +370,10 @@ void Server::cmdNick(User *user, std::string cmd) {
 
 	if (new_nickname.size() == 0) {
 		std::cout <<  RED << BOLD << "Nickname too short!" << RESET << std::endl << std::endl;
-		send(user->getFd(), NICKNAME_NOT_FOUND, sizeof(NICKNAME_NOT_FOUND), 0);
+		sentUser(user, NICKNAME_NOT_FOUND);
 	} else if (new_nickname.size() > 9) {
 		std::cout <<  RED << BOLD << "Nickname too long!" << RESET << std::endl << std::endl;
-		send(user->getFd(), NICKNAME_TOO_LONG, sizeof(NICKNAME_TOO_LONG), 0);
+		sentUser(user, NICKNAME_TOO_LONG);
 	}
 	else {
 		// Check if nickname is already taken
@@ -363,7 +381,7 @@ void Server::cmdNick(User *user, std::string cmd) {
 		while (it != _usrs.end()) {
 			if (it->getNickname() == new_nickname) {
 				std::cout << RED << BOLD << "Nickname already taken." << RESET << std::endl << std::endl;
-				send(user->getFd(), NICKNAME_ALREADY_USED, sizeof(NICKNAME_ALREADY_USED), 0);
+				sentUser(user, NICKNAME_ALREADY_USED);
 				return;
 			}
 			it++;
@@ -371,6 +389,7 @@ void Server::cmdNick(User *user, std::string cmd) {
 
 		std::cout <<  ORANGE << ITALIC << user->getNickname() << RESET << " is now " << CYAN << BOLD << new_nickname << RESET << std::endl << std::endl;
 		user->setNickname(new_nickname);
+		sentUser(user, "Nickname updated.");
 	}
 			
 }
