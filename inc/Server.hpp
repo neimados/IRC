@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 00:18:41 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/18 13:21:13 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,15 +33,14 @@
 #include "User.hpp"
 
 // Const defines
-#define WELCOME "Welcome to the IRC server!\n"
 #define PROMPT "$irc> "
 #define MAX_CLIENTS 10
 #define MAX_BUFFER 1024
-#define NICKNAME_ALREADY_USED "\033[0;31mError:\033[0m Nickname already in use.\n"
-#define NICKNAME_NOT_FOUND "\033[0;31mError:\033[0m <nickname> not found.\n"
-#define NICKNAME_TOO_LONG "\033[0;31mError:\033[0m Nickname too long.\n"
-#define NICKNAME_FORMAT "\033[0;31mError:\033[0m Nickname must contain only letters, numbers and underscores.\n"
-#define USE_HELP "\033[0;31mError:\033[0m Command not found.\n\rUse /HELP to see the list of available commands.\n"
+#define NICKNAME_ALREADY_USED "Error: Nickname already in use.\n"
+#define NICKNAME_NOT_FOUND "Error: <nickname> not found.\n"
+#define NICKNAME_TOO_LONG "Error: Nickname too long.\n"
+#define NICKNAME_FORMAT "Error: Nickname must contain only letters, numbers and underscores.\n"
+#define USE_HELP "Error: Command not found.\n\rUse /HELP to see the list of available commands.\n"
 
 // Defines colors
 #define RED "\033[0;31m"
@@ -69,9 +68,10 @@ public:
 	Server(int port);
 	~Server();
 
-	void startSrv();
-	void addUser();
-	void cmdUser(int fd);
+	void	startSrv();
+	void	addUser();
+	void	cmdUser(int fd);
+	void	execCmd(User *user, std::string cmd);
 
 	int checkWritable(int fd);
 
@@ -83,7 +83,7 @@ public:
 	// Supported commands
 	void cmdNick(User *user, std::string cmd);
 	void cmdHelp(User *user);
-	// void cmdUser(User *user, std::string &cmd);
+	void cmdUser(User *user, std::string cmd);
 	void cmdList(User *user);
 	// void cmdJoin(User *user, std::string &cmd);
 	// void cmdPart(User *user, std::string &cmd);

@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 00:40:38 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/18 13:31:37 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void Server::startSrv() {
 	
 	// Boucle principale
 	while (1) {
-		std::cout << std::endl << CYAN << _nbUsers - 1 << " connected." << BOLD << MAGENTA << " Waiting for new connection..." << RESET << std::endl;
+		std::cout << std::endl << CYAN << _nbUsers - 1 << " connected." << BOLD << MAGENTA << " Waiting for new connection..." << RESET << std::endl << std::endl;
 		std::cout << "\033[1A\033[2K";
 		std::cout << "\033[1A\033[2K";
 		
@@ -133,10 +133,21 @@ void Server::addUser() {
 	_usrs.push_back(*user);
 	_nbUsers++;
 
+	std::string msg = ":";
+	
+	msg += "IRC";
+	msg += " 001 ";
+	msg += nickname;
+	msg += " :Welcome ";
+	msg += nickname;
+	msg += " to serv IRC\n\r";
+
+	const void *cmsg = msg.c_str();
+
 	if (!(user->getVerification())) {
 		if (checkWritable(user->getFd())) {
-			send(user->getFd(), WELCOME, sizeof(WELCOME), 0);
-			user->sendPrompt();
+			send(user->getFd(), cmsg, msg.size(), 0);
+			// user->sendPrompt();
 		}
 	}
 }
@@ -203,54 +214,16 @@ void	Server::cmdUser(int fd){
 	}
 	else {
 		std::string cmd(buf);
+		std::string delimiter = "\n";
+		
 		cmd = cmd.substr(0, cmd.size() - 1);
-		std::cout <<  BOLD << nickname << ": " << RESET << cmd <<std::endl;
 
-		// Check if buffer is in format "/NICK <nickname>"
-		if (cmd.substr(0, 5) == "/NICK") {
-			this->cmdNick(user, cmd);
-			user->sendPrompt();
-		}
-		else if (cmd.substr(0, 5) == "/JOIN") {
-			std::cout <<  "Command JOIN received from " << BOLD << nickname << RESET << std::endl;
-			// std::string channel = cmd.substr(6, cmd.size() - 6);
-			// std::cout <<  "New channel: " << BOLD << channel << RESET << std::endl;
-			// user->setChannel(channel);
-			// std::cout <<  "Channel changed to " << BOLD << user->getChannel() << RESET << std::endl;
-		}
-		else if (cmd.substr(0, 4) == "/MSG") {
-			std::cout <<  "Command MSG received from " << BOLD << nickname << RESET << std::endl;
-			// std::string message = cmd.substr(5, cmd.size() - 5);
-			// std::cout <<  "New message: " << BOLD << message << RESET << std::endl;
-			// user->setMessage(message);
-			// std::cout <<  "Message changed to " << BOLD << user->getMessage() << RESET << std::endl;
-		}
-		else if (cmd.substr(0, 5) == "/LIST") {
-			std::cout <<  CYAN << ITALIC << "Showing users and channels." << RESET << std::endl << std::endl;
-			this->cmdList(user);
-			user->sendPrompt();
-		}
-		else if (cmd.substr(0, 5) == "/PART") {
-			std::cout <<  "Command PART received from " << BOLD << nickname << RESET << std::endl;
-			std::cout <<  "Leaving channel..." << std::endl;
-		}
-		else if (cmd.substr(0, 5) == "/QUIT") {
-			std::cout <<  "Command QUIT received from " << BOLD << nickname << RESET << std::endl;
-			std::cout <<  "Leaving server..." << std::endl;
-			
-			// Connection closed
-			// std::cout << std::endl <<  YELLOW << "Client " << BOLD << nickname << NORMAL " on socket " << ITALIC << socket << RESET << YELLOW << " disconnected!" << RESET << std::endl;
-			close(clientFd);
-		}
-		else if (cmd.substr(0, 5) == "/HELP") {
-			std::cout <<  CYAN << ITALIC << "Showing commands." << RESET << std::endl << std::endl;
-			this->cmdHelp(user);
-			user->sendPrompt();
-		}
-		else {
-			std::cout <<  RED << BOLD << "Command not found." << RESET << std::endl << std::endl;
-			send(clientFd, USE_HELP, sizeof(USE_HELP), 0);
-			user->sendPrompt();
+		size_t pos = 0;
+		std::string token;
+		while ((pos = cmd.find(delimiter)) != std::string::npos) {
+			token = cmd.substr(0, pos);
+			execCmd(user, token);
+			cmd.erase(0, pos + delimiter.length());
 		}
 	}
 	
@@ -285,6 +258,36 @@ std::string Server::getTime() const {
 
 
 // ========= Supported commands =========
+void Server::execCmd(User *user, std::string cmd) {
+	std::cout <<  BOLD << user->getNickname() << ": " << RESET << cmd <<std::endl;
+	if (cmd.substr(0, 4) == "NICK") {
+		this->cmdNick(user, cmd);
+		// user->sendPrompt();
+	} else if (cmd.substr(0, 4) == "USER") {
+		this->cmdUser(user, cmd);
+		// user->sendPrompt();
+	} else if (cmd.substr(0, 3) == "CAP") {
+		std::cout <<  CYAN << ITALIC << "CAP command called." << RESET << std::endl << std::endl;
+	} else if (cmd.substr(0, 3) == "PING") {
+		std::cout <<  CYAN << ITALIC << "PING command called." << RESET << std::endl << std::endl;
+	} else if (cmd.substr(0, 4) == "LIST") {
+		std::cout <<  CYAN << ITALIC << "Showing users and channels." << RESET << std::endl << std::endl;
+		this->cmdList(user);
+		user->sendPrompt();
+	} else if (cmd.substr(0, 4) == "QUIT") {
+		std::cout <<  "Command QUIT received from " << BOLD << user->getNickname() << RESET << std::endl;
+		std::cout <<  "Leaving server..." << std::endl;
+		
+		// Connection closed
+		// std::cout << std::endl <<  YELLOW << "Client " << BOLD << nickname << NORMAL " on socket " << ITALIC << socket << RESET << YELLOW << " disconnected!" << RESET << std::endl;
+		// close(user->getFd());
+	} else {
+		std::cout <<  RED << BOLD << "Command not found." << RESET << std::endl << std::endl;
+		send(user->getFd(), USE_HELP, sizeof(USE_HELP), 0);
+		user->sendPrompt();
+	}
+}
+
 void Server::cmdNick(User *user, std::string cmd) {
 	for (size_t i = 0; i < cmd.size(); i++) {
 		if (cmd[i] == ' ') {
@@ -304,14 +307,14 @@ void Server::cmdNick(User *user, std::string cmd) {
 			break;
 	}
 
-	if (cmd.size() <= 5) {
+	if (cmd.size() <= 4) {
 		std::cout <<  RED << BOLD << "<nickname> not found." << RESET << std::endl << std::endl;
 		send(user->getFd(), NICKNAME_NOT_FOUND, sizeof(NICKNAME_NOT_FOUND), 0);
 		user->sendPrompt();
 		return;
 	}
 	
-	std::string new_nickname = cmd.substr(6, cmd.size() - 6);
+	std::string new_nickname = cmd.substr(5, cmd.size() - 5);
 
 	// Remove spaces from new_nickname
 	for (size_t i = 0; i < new_nickname.size(); i++) {
@@ -321,7 +324,12 @@ void Server::cmdNick(User *user, std::string cmd) {
 		}
 	}
 
-	if (new_nickname.size() == 0 || new_nickname == user->getNickname()) {
+	if (new_nickname == user->getNickname()) {
+		std::cout <<  ORANGE << ITALIC << user->getNickname() << RESET << " is still " << CYAN << BOLD << new_nickname << RESET << std::endl << std::endl;
+		return;
+	}
+
+	if (new_nickname.size() == 0) {
 		std::cout <<  RED << BOLD << "Nickname is not valid." << RESET << std::endl << std::endl;
 		send(user->getFd(), NICKNAME_FORMAT, sizeof(NICKNAME_FORMAT), 0);
 		user->sendPrompt();
@@ -365,6 +373,12 @@ void Server::cmdNick(User *user, std::string cmd) {
 		user->setNickname(new_nickname);
 	}
 			
+}
+
+void Server::cmdUser(User *user, std::string cmd) {
+	(void)user;
+	(void)cmd;
+	std::cout <<  CYAN << ITALIC << "USER command called." << RESET << std::endl << std::endl;
 }
 
 void Server::cmdHelp(User *user) {
