@@ -65,7 +65,7 @@ class User;
 
 class Server {
 public:
-	Server(int port);
+	Server(int port, std::string password);
 	~Server();
 
 	void	startSrv();
@@ -80,8 +80,10 @@ public:
 	int	getNumberUsers() const;
 	User *getUser(int fd);
 	std::string getTime() const;
+	std::string getPassword() const;
 
 	// Supported commands
+	void cmdPass(User *user, std::string cmd);
 	void cmdNick(User *user, std::string cmd);
 	void cmdUser(User *user, std::string cmd);
 	void cmdList(User *user);
@@ -112,6 +114,7 @@ private:
 	int						_port;
 	int						_nbUsers;
 	std::string				_Port;
+	std::string				_password;
 	std::vector<User>		_usrs;
 	std::vector<User>		_chans; // Update User to Chanel
 

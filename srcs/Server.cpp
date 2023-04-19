@@ -12,11 +12,12 @@
 
 #include "../inc/Server.hpp"
 
-Server::Server(int port) {
+Server::Server(int port, std::string password) {
 	_fds = new struct pollfd[10];
 	_fdSrv = 0;
 	_nbUsers = 1;
 	_port = port;
+	_password = password;
 
 	std::stringstream ss;
     ss << _port;
@@ -277,12 +278,17 @@ std::string Server::getTime() const {
 	return str;
 }
 
+std::string Server::getPassword() const {
+	return (this->_password);
+}
+
 
 // ========= Supported commands =========
 void Server::execCmd(User *user, std::string cmd) {
 	std::cout <<  BOLD << user->getNickname() << ": " << RESET << cmd <<std::endl;
-	
-	if (cmd.substr(0, 4) == "NICK") {
+	if (cmd.substr(0, 4) == "PASS") { //check password. If ok getPassOk() = true
+		this->cmdPass(user, cmd);
+	} else if (cmd.substr(0, 4) == "NICK") {
 		this->cmdNick(user, cmd);
 	} else if (cmd.substr(0, 4) == "USER") {
 		this->cmdUser(user, cmd);
@@ -388,6 +394,41 @@ void Server::cmdNick(User *user, std::string cmd) {
 		sentUser(user, "Nickname updated.");
 	}
 			
+}
+
+void Server::cmdPass(User *user, std::string cmd) {
+	for (size_t i = 0; i < cmd.size(); i++) {
+		if (cmd[i] == ' ') {
+			cmd.erase(i, 1);
+			i--;
+		}
+		else
+			break;
+	}
+	for (int i = cmd.size() - 1; i >= 0; i--) {
+		if (cmd[i] == ' ') {
+			cmd.erase(i, 1);
+			i--;
+		}
+		else
+			break;
+	}
+	if (cmd.size() <= 4) {
+		std::cout <<  RED << BOLD << "Missing password." << std::endl;
+		return;
+	}
+	std::string pass = cmd.substr(5, cmd.size() - 5);
+	for (size_t i = 0; i < pass.size(); i++) {
+		if (pass[i] == ' ' || pass[i] == '\t' || pass[i] == '\n' || pass[i] == '\r') {
+			pass.erase(i, 1);
+			i--;
+		}
+	}
+	user->setPassword(pass);
+	if (pass == this->getPassword())
+		user->setPassOk(true);
+	else
+		std::cout<<"Incorrect Password !"<<std::endl;
 }
 
 void Server::cmdUser(User *user, std::string cmd) {

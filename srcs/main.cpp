@@ -58,7 +58,7 @@ int main(int ac, char **av) {
             // Irc irc(port, av[2]);
 
             // classe serveur test
-            Server srv(port);
+            Server srv(port, av[2]);
             
             srv.startSrv();
         } else {

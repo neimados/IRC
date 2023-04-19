@@ -36,6 +36,7 @@ public:
     bool    getVerification();
     bool    getUserVerification();
     bool    getChannelVerification();
+    bool    getPassOk();
 
     pollfd  getPollFd();
     int     getisInChannel();
@@ -53,6 +54,7 @@ public:
     void    setChannelVerification(bool type);
     void    setisInChannel(int n);
     void    setWhatChannel(std::string channelName);
+    void    setPassOk(int ok);
     
     // Commands
     bool    channelLimit();
@@ -72,6 +74,7 @@ private:
     bool        isVerified;
     bool        userIsVerified;
     bool        isInChannel;
+    bool        passOk;
 
     std::string whatChannel;
     int noChannels;

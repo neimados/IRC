@@ -23,6 +23,7 @@ User::User(pollfd Client, int fd, int socket) {
     this->isInChannel = false;
     this->noChannels = 0;
     this->_client = Client;
+    this->passOk = false;
 }
 
 User User::USER(std::string username) {
@@ -60,6 +61,9 @@ bool    User::getUserVerification() {
 }
 bool    User::getChannelVerification() {
     return this->isInChannel;
+}
+bool    User::getPassOk() {
+    return this->passOk;
 }
 
 pollfd  User::getPollFd() {
@@ -99,6 +103,9 @@ void    User::setisInChannel(int n) {
 }
 void    User::setWhatChannel(std::string channelName) {
     this->whatChannel = channelName;
+}
+void    User::setPassOk(int ok) {
+    this->passOk = ok;
 }
 
 void User::sendPrompt() {
