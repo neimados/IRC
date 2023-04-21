@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/19 00:23:05 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/21 18:51:03 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ public:
 	void	sentUser(User *user, std::string msg);
 
 	int checkWritable(int fd);
+	void	disconnectUser(User *user);
 
 	// Getters
 	int	getNumberUsers() const;

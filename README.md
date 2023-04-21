@@ -11,7 +11,7 @@
 
 # Commandes à implémenter
 - ✅ NICK
-- PASS
+- 🚧 PASS
 - USER
 - 🚧 LIST
 - JOIN

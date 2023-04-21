@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/19 00:23:13 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/21 19:23:34 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,7 @@ void Server::addUser() {
 
 	std::string msg = ":";
 	
-	msg = ":IRC 001 yo";
+	msg = ":IRC 001 ";
 	msg += nickname;
 	msg += " :Welcome ";
 	msg += nickname;
@@ -147,7 +147,6 @@ void Server::addUser() {
 	if (!(user->getVerification())) {
 		if (checkWritable(user->getFd())) {
 			send(user->getFd(), cmsg, msg.size(), 0);
-			// user->sendPrompt();
 		}
 	}
 }
@@ -178,39 +177,41 @@ int Server::checkWritable(int fd) {
 	return 0;
 }
 
+void	Server::disconnectUser(User *user) {
+	std::vector<User>::iterator it;
+
+	for (it = _usrs.begin(); it != _usrs.end(); it++) {
+		if (it->getFd() == user->getFd()) {
+			close(user->getFd());
+			_usrs.erase(it);
+			break;
+		}
+	}
+
+	_nbUsers--;
+	std::cout << std::endl <<  YELLOW << "Client " << BOLD << user->getNickname() << NORMAL;
+	std::cout << " on socket " << ITALIC << user->getSocket() << RESET << YELLOW << " disconnected at " << this->getTime() << RESET << std::endl;
+}
+
 void	Server::cmdUser(int fd){
 	char						buf[MAX_BUFFER];
 	std::vector<User>::iterator it;
 
 	User 						*user;
-	std::string					nickname;
+	std::string			nickname;
 	int							clientFd;
-	int							socket;
 	
 	user = this->getUser(_fds[fd].fd);
+
 	if (!user)
 		throw SrvErrorClient();
 
 	clientFd = user->getFd();
-	socket = user->getSocket();
 	nickname = user->getNickname();
-
-	// send(clientFd, PROMPT, 6, 0);
 
 	if (recv(clientFd, buf, MAX_BUFFER, 0) <= 0) {
 		// Connection closed
-		std::cout << std::endl <<  YELLOW << "Client " << BOLD << nickname << NORMAL " on socket " << ITALIC << socket << RESET << YELLOW << " disconnected at " << this->getTime() << RESET << std::endl;
-		close(clientFd);
-		
-		_fds[fd] = _fds[_nbUsers -1];
-		it = _usrs.begin();
-		
-		while (it != _usrs.end()){
-			if (it->getFd() == fd)
-				_usrs.erase(it);
-			it++;
-		}
-		_nbUsers--;
+		disconnectUser(user);
 	}
 	else {
 		std::string cmd(buf);
@@ -247,7 +248,6 @@ void Server::sentUser(User *user, std::string msg) {
 	if (!(user->getVerification())) {
 		if (checkWritable(user->getFd())) {
 			send(user->getFd(), cmsg, msg.size(), 0);
-			// user->sendPrompt();
 		}
 	}
 }
@@ -285,9 +285,16 @@ std::string Server::getPassword() const {
 
 // ========= Supported commands =========
 void Server::execCmd(User *user, std::string cmd) {
+	bool passOk = user->getPassOk();
 	std::cout <<  BOLD << user->getNickname() << ": " << RESET << cmd <<std::endl;
-	if (cmd.substr(0, 4) == "PASS") { //check password. If ok getPassOk() = true
+	
+	if (cmd.substr(0, 4) == "PASS") {
+		//check password. If ok getPassOk() = true
 		this->cmdPass(user, cmd);
+	} else if (passOk == false) {
+		// Deconnect user
+		sentUser(user, "Wrong password");
+		close(user->getFd());
 	} else if (cmd.substr(0, 4) == "NICK") {
 		this->cmdNick(user, cmd);
 	} else if (cmd.substr(0, 4) == "USER") {
@@ -301,7 +308,12 @@ void Server::execCmd(User *user, std::string cmd) {
 		std::cout <<  CYAN << ITALIC << "Showing users and channels." << RESET << std::endl << std::endl;
 		this->cmdList(user);
 	} else if (cmd.substr(0, 4) == "QUIT") {
-		std::cout <<  "Command QUIT received from " << BOLD << user->getNickname() << RESET << std::endl;
+		std::string msg = "";
+		
+		if (cmd.size() > 6)
+			msg = cmd.substr(6);
+		
+		std::cout <<  "Command QUIT received from " << BOLD << user->getNickname() << RESET << " with message: " << ITALIC << msg << RESET << std::endl;
 	} else if (cmd.substr(0, 4) == "JOIN") {
 		std::cout <<  CYAN << ITALIC << "JOIN command called." << RESET << std::endl << std::endl;
 		sentUser(user, "Join channel `" + cmd.substr(5) + "`. (non en vrai ça ne fait rien)");
@@ -397,6 +409,8 @@ void Server::cmdNick(User *user, std::string cmd) {
 }
 
 void Server::cmdPass(User *user, std::string cmd) {
+	std::vector<User>::iterator it;
+	
 	for (size_t i = 0; i < cmd.size(); i++) {
 		if (cmd[i] == ' ') {
 			cmd.erase(i, 1);
@@ -424,11 +438,16 @@ void Server::cmdPass(User *user, std::string cmd) {
 			i--;
 		}
 	}
+	
 	user->setPassword(pass);
+	
 	if (pass == this->getPassword())
 		user->setPassOk(true);
-	else
-		std::cout<<"Incorrect Password !"<<std::endl;
+	else {
+		sentUser(user, "Wrong password.");
+		std::cout <<  RED << BOLD << "Wrong password." << RESET << std::endl;
+		disconnectUser(user);
+	}
 }
 
 void Server::cmdUser(User *user, std::string cmd) {
