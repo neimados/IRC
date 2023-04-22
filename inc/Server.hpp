@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/21 18:51:03 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/22 17:55:58 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,14 +33,8 @@
 #include "User.hpp"
 
 // Const defines
-#define PROMPT "$irc> "
 #define MAX_CLIENTS 10
 #define MAX_BUFFER 1024
-#define NICKNAME_ALREADY_USED "Error: Nickname already in use.\n"
-#define NICKNAME_NOT_FOUND "Error: <nickname> not found.\n"
-#define NICKNAME_TOO_LONG "Error: Nickname too long.\n"
-#define NICKNAME_FORMAT "Error: Nickname must contain only letters, numbers and underscores.\n"
-#define USE_HELP "Error: Command not found.\n\rUse /HELP to see the list of available commands.\n"
 
 // Defines colors
 #define RED "\033[0;31m"
@@ -68,33 +62,45 @@ public:
 	Server(int port, std::string password);
 	~Server();
 
+
+	/* ===== BASICS ===== */
 	void	startSrv();
 	void	addUser();
-	void	cmdUser(int fd);
-	void	execCmd(User *user, std::string cmd);
-	void	sentUser(User *user, std::string msg);
-
-	int checkWritable(int fd);
+	void	parseCmd(int fd);
 	void	disconnectUser(User *user);
+	void	execCmd(User *user, std::string cmd);
+	void	sendToUser(User *user, std::string msg);
+	
+	
+	/* ===== UTILS ===== */
+	int checkWritable(int fd);
+	
+	void	displayWelcome(User *user);
+	void	displayWrongPass(User *user);
 
-	// Getters
+
+	/* ===== GETTERS ===== */
+	User	*getUser(int fd);
+	
 	int	getNumberUsers() const;
-	User *getUser(int fd);
-	std::string getTime() const;
-	std::string getPassword() const;
 
-	// Supported commands
+	std::string	getTime() const;
+	std::string	getPassword() const;
+
+
+	/* ===== COMMANDS ===== */
+	void cmdList(User *user, std::string cmd);
 	void cmdPass(User *user, std::string cmd);
 	void cmdNick(User *user, std::string cmd);
 	void cmdUser(User *user, std::string cmd);
-	void cmdList(User *user);
-	// void cmdJoin(User *user, std::string &cmd);
-	// void cmdPart(User *user, std::string &cmd);
-	// void cmdNames(User *user, std::string &cmd);
-	// void cmdPrivmsg(User *user, std::string &cmd);
-	// void cmdQuit(User *user, std::string &cmd);
+	void cmdQuit(User *user, std::string cmd);
+	void cmdJoin(User *user, std::string cmd);
+	void cmdPing(User *user, std::string cmd);
+	void cmdCap(User *user, std::string cmd);
+	void cmdNames(User *user, std::string cmd);
 	
 
+	/* ===== ERRORS ===== */
 	class SrvError : public std::exception {
 		public:
 			virtual const char* what() const throw();
@@ -111,9 +117,9 @@ private:
 	Server &operator= (Server const &srv);
 
 	struct pollfd			*_fds;
-	int						_fdSrv;
-	int						_port;
-	int						_nbUsers;
+	int								_fdSrv;
+	int								_port;
+	int								_nbUsers;
 	std::string				_Port;
 	std::string				_password;
 	std::vector<User>		_usrs;

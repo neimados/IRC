@@ -11,17 +11,17 @@
 
 # Commandes à implémenter
 - ✅ NICK
-- 🚧 PASS
-- USER
-- 🚧 LIST
-- JOIN
-- NAMES
-- PRIVMSG
-- NOTICE
-- KICK
-- INVITE
-- MODE
+- ✅ PASS
+- ✅ USER
 - ✅ PING
-- PART
 - ✅ QUIT
-- TOPIC
+- 🚧 LIST          (channel)
+- 🚧 JOIN          (channel)
+- 🚧 NAMES         (channel)
+- PRIVMSG       (message)
+- NOTICE        (message)
+- KICK          (channel)
+- INVITE        (channel)
+- PART          (channel)
+- TOPIC         (channel)
+- MODE          (channel and user)

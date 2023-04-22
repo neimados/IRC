@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 00:38:13 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/22 16:48:35 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,6 @@ public:
     pollfd  getPollFd();
     int     getisInChannel();
     std::string getWhatChannel() const;
-
-    void sendPrompt();
     
     // Setters
     void    setNickname(std::string nickname);

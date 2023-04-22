@@ -34,7 +34,7 @@ re: fclean all
 
 test: all
 	clear
-	./$(NAME) 6667 test
+	./$(NAME) 6667 machin
 
 .PHONY: all clean fclean re test
 -include $(DEPENDS)

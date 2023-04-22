@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/18 00:38:20 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/22 16:48:40 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,21 +106,6 @@ void    User::setWhatChannel(std::string channelName) {
 }
 void    User::setPassOk(int ok) {
     this->passOk = ok;
-}
-
-void User::sendPrompt() {
-    std::string nick;
-			
-    nick += "";
-    nick += GREEN;
-    nick += ITALIC;
-    nick += this->getNickname();
-    nick += RESET;
-    nick += " $> ";
-    
-    const void *nickanme = nick.c_str();
-    const size_t nickname_len = nick.length();
-    send(this->getFd(), nickanme, nickname_len, 0);
 }
 
 // Commands
