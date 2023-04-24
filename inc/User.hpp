@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/22 16:48:35 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/24 19:19:05 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Server.hpp"
+#include "Channel.hpp"
+
 
 class Server;
 

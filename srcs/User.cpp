@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/22 16:48:40 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/24 19:21:31 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/User.hpp"
+#include "../inc/Channel.hpp"
 
 User::User() {}
 User::~User() {}

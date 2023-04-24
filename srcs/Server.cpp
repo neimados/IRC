@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/22 18:08:54 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/24 19:03:13 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+#include "../inc/Channel.hpp"
+#include "../inc/User.hpp"
 
 Server::Server(int port, std::string password) {
 	_fds = new struct pollfd[10];
@@ -573,7 +575,9 @@ void Server::cmdList(User *user, std::string cmd) {
 
 void Server::cmdJoin(User *user, std::string cmd) {
 	// ! REPLACE USER BY CHANNEL
-	std::vector<User>::iterator it = _chans.begin();
+	std::vector<Channel>::iterator it = _channels.begin();
+	int tmp;
+
 
 	std::string channel = cmd.substr(5);
 	
@@ -584,23 +588,57 @@ void Server::cmdJoin(User *user, std::string cmd) {
 		sendToUser(user, "Error: missing channel name.");
 		return;
 	}
-
-	while (it != _chans.end()) {
-		if (it->getNickname() == channel) {
-			std::cout << RED << BOLD << "Channel already exists." << RESET << std::endl << std::endl;
-			sendToUser(user, "Error: channel already exists.");
-			return;
-		}
-		it++;
+	else if ((_channels.size() == 0) || (findChan(_channels, channel) != -1)) {
+		_channels.push_back(channel);
+		std::cout << GREEN << BOLD << "Channel " << channel << " created." << RESET << std::endl << std::endl;
+		sendToUser(user, "Channel " + channel + " created.");
+		it = _channels.end() - 1;
+		it->addUsr(user);
+		it = _channels.begin();
 	}
+	else if (findChan(_channels, channel) >= 0)
+	{
+		tmp = findChan(_channels, channel);
+		_channels[tmp].addUsr(user);
+	}
+	// while (it != _channels.end()) {
+	// 	if (it->getNickname() == channel) {
+	// 		std::cout << RED << BOLD << "Channel already exists." << RESET << std::endl << std::endl;
+	// 		sendToUser(user, "Error: channel already exists.");
+	// 		return;
+	// 	}
+	// 	it++;
+	// }
+
 
 	// Create the channel
 	// User chan;
 	// chan.setTopic(channel);
-	// _chans.push_back(chan);
+	// _channels.push_back(chan);
 
-	std::cout << GREEN << BOLD << "Channel " << channel << " created." << RESET << std::endl << std::endl;
-	sendToUser(user, "Channel " + channel + " created.");
+}
+
+
+// i wish i could do it other wise, without an int, but return a Channel;
+int Server::findChan(std::vector<Channel> const _channels, std::string const name) const {
+	size_t i = 0;
+	if (_channels.size() == 0)
+		return (-1);
+	while (i < _channels.size())
+	{
+		if (_channels[i].getName() == name)
+			return i;
+		else
+			i++;
+	}
+	return (-1);
+
+	// Create the channel
+	// User chan;
+	// chan.setTopic(channel);
+	// _channels.push_back(chan);
+
+	
 }
 
 void Server::cmdNames(User *user, std::string cmd) {

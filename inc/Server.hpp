@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/22 17:55:58 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/24 18:55:18 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 #include <signal.h>
 
 #include "User.hpp"
+#include "Channel.hpp"
 
 // Const defines
 #define MAX_CLIENTS 10
@@ -86,6 +87,8 @@ public:
 
 	std::string	getTime() const;
 	std::string	getPassword() const;
+	int findChan(std::vector<Channel> const _chans, std::string const name) const;
+
 
 
 	/* ===== COMMANDS ===== */
@@ -124,5 +127,5 @@ private:
 	std::string				_password;
 	std::vector<User>		_usrs;
 	std::vector<User>		_chans; // Update User to Chanel
-
+	std::vector<Channel>	_channels;
 };

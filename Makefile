@@ -1,7 +1,7 @@
 NAME	= ircserv
 
 SRCSDIR	= srcs/
-SRCS	= main.cpp Server.cpp User.cpp
+SRCS	= main.cpp Server.cpp User.cpp Channel.cpp
 OBJDIR	= objs/
 OBJS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.o))
 DEPENDS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.d))

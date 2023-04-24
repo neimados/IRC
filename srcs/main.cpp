@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:51 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/17 22:05:00 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/04/24 19:15:34 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+#include "../inc/Channel.hpp"
 
 // Function to catch ctrl + c
 void    sigint_handler(int sig)
