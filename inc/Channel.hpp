@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/04/24 19:21:15 by guyar            ###   ########.fr       */
+/*   Updated: 2023/04/25 19:15:10 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,14 @@ public:
     ~Channel();
     void addUsr(User * user);
     std::string getName() const;
+    std::vector<std::string> getChanUsrs();
+
 
 private:
+
+    int i;
+
+
     std::string _name;
     std::vector<User>		_usrs;
 

@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/24 19:03:13 by guyar            ###   ########.fr       */
+/*   Updated: 2023/04/25 19:16:00 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -578,7 +578,6 @@ void Server::cmdJoin(User *user, std::string cmd) {
 	std::vector<Channel>::iterator it = _channels.begin();
 	int tmp;
 
-
 	std::string channel = cmd.substr(5);
 	
 	std::cout << "Command JOIN received from " << BOLD << user->getNickname() << RESET << " with channel: " << ITALIC << channel << RESET << std::endl;
@@ -588,29 +587,45 @@ void Server::cmdJoin(User *user, std::string cmd) {
 		sendToUser(user, "Error: missing channel name.");
 		return;
 	}
-	else if ((_channels.size() == 0) || (findChan(_channels, channel) != -1)) {
+	else if ((_channels.size() == 0) || (findChan(_channels, channel) == -1)) {
 		_channels.push_back(channel);
 		std::cout << GREEN << BOLD << "Channel " << channel << " created." << RESET << std::endl << std::endl;
 		sendToUser(user, "Channel " + channel + " created.");
 		it = _channels.end() - 1;
 		it->addUsr(user);
+		std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl;
 		it = _channels.begin();
+		std::cout << "_channels size = " << _channels.size() << std::endl;
+		// while((tmp <= _channels.size()) && (_channels.size() != 0))
+		// {
+		// 	while (i <= _channels[tmp]._usrs.size() && _channels[tmp]._usrs.size() != 0)
+		// 	{
+		// 		_channels[tmp]._usrs[i].getNickname();
+		// 		i++;
+		// 	}
+		// 	i = 0;
+		// 	tmp++;
+		// }
 	}
 	else if (findChan(_channels, channel) >= 0)
 	{
 		tmp = findChan(_channels, channel);
 		_channels[tmp].addUsr(user);
+		std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl;
 	}
-	// while (it != _channels.end()) {
-	// 	if (it->getNickname() == channel) {
-	// 		std::cout << RED << BOLD << "Channel already exists." << RESET << std::endl << std::endl;
-	// 		sendToUser(user, "Error: channel already exists.");
-	// 		return;
+	// test if user is already in channel;
+	// send to others that USER joined the channel;
+	// 
 	// 	}
 	// 	it++;
 	// }
 
 
+	// while (it != _channels.end()) {
+	// 	if (it->getNickname() == channel) {
+	// 		std::cout << RED << BOLD << "Channel already exists." << RESET << std::endl << std::endl;
+	// 		sendToUser(user, "Error: channel already exists.");
+	// 		return;);
 	// Create the channel
 	// User chan;
 	// chan.setTopic(channel);
