@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/04/25 19:13:37 by guyar            ###   ########.fr       */
+/*   Updated: 2023/04/26 18:47:42 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,3 +31,23 @@ std::string Channel::getName() const {
 void Channel::addUsr(User * user) {
     _usrs.push_back(*user);
 }
+
+std::vector<std::string> Channel::getChanUsrs() const {
+    
+    std::vector<std::string> list;
+    int tmp = 0;
+
+    if (_usrs.size() == 0)
+        return (list);
+    while (tmp < static_cast<int>(_usrs.size()))
+    {
+        list.push_back(_usrs[tmp].getNickname());
+        tmp++;
+    }
+    return (list);
+}
+
+// User * Channel::getChanUsr(int i) const {
+//     if (_usrs.size() != 0 && !_usrs[i].empty())
+//         return &_usrs[i];
+// }

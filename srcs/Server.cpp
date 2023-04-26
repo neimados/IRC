@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/25 19:16:00 by guyar            ###   ########.fr       */
+/*   Updated: 2023/04/26 18:47:09 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -577,6 +577,7 @@ void Server::cmdJoin(User *user, std::string cmd) {
 	// ! REPLACE USER BY CHANNEL
 	std::vector<Channel>::iterator it = _channels.begin();
 	int tmp;
+	std::vector<std::string> usrlist;
 
 	std::string channel = cmd.substr(5);
 	
@@ -591,28 +592,41 @@ void Server::cmdJoin(User *user, std::string cmd) {
 		_channels.push_back(channel);
 		std::cout << GREEN << BOLD << "Channel " << channel << " created." << RESET << std::endl << std::endl;
 		sendToUser(user, "Channel " + channel + " created.");
-		it = _channels.end() - 1;
+		it = _channels.end()--;
 		it->addUsr(user);
-		std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl;
-		it = _channels.begin();
-		std::cout << "_channels size = " << _channels.size() << std::endl;
-		// while((tmp <= _channels.size()) && (_channels.size() != 0))
-		// {
-		// 	while (i <= _channels[tmp]._usrs.size() && _channels[tmp]._usrs.size() != 0)
-		// 	{
-		// 		_channels[tmp]._usrs[i].getNickname();
-		// 		i++;
-		// 	}
-		// 	i = 0;
-		// 	tmp++;
-		// }
+		std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl; 
 	}
 	else if (findChan(_channels, channel) >= 0)
 	{
 		tmp = findChan(_channels, channel);
 		_channels[tmp].addUsr(user);
 		std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl;
+
+
+		/***********************************************************************/
+		// tmp = 0;
+		// it = _channels.end()--;
+		// usrlist = it->getChanUsrs();
+		// sendToUser(user, "in this channel:\n");
+		// while (tmp < static_cast<int>(usrlist.size()))
+		// {
+		// 	sendToUser(user, "- " + usrlist[tmp] + "\n");
+		// 	tmp++;
+		// }
+		// tmp = 0;
+		// while (tmp < static_cast<int>(it._usrs.size()))
+		// {
+		// 	sendToUser(it->getChanUsr(tmp), user->getNickname() + " joined the channel\n");
+		// 	tmp++;
+		// }
+		/*************************************************************************/
 	}
+	// tmp = 0; 
+	// while (tmp < static_cast<int>(usrlist.size()) && usrlist.size() != 0)
+	// {
+	// 	std::cout << "user " << tmp << " " << usrlist[0] << std::endl;
+	// 	tmp++;
+	// }
 	// test if user is already in channel;
 	// send to others that USER joined the channel;
 	// 
