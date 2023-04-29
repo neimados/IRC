@@ -91,7 +91,7 @@ void Server::startSrv() {
 			throw SrvError();
 
 		for (int i = 0; i < _nbUsers; i++) {
-			if (_fds[i].revents & POLLIN) {
+			if (_fds[i].revents && POLLIN) {
 				if (_fds[i].fd == _fdSrv)
 					addUser(); // Add user to the server
 				else
@@ -245,7 +245,7 @@ void Server::sendToUser(User *user, std::string msg) {
 	start += user->getNickname();
 	start += " :";
 
-	msg = start + msg + "\n\r";
+	msg = start + msg + "\r\n";
 	
 	const void *cmsg = msg.c_str();
 
@@ -255,7 +255,6 @@ void Server::sendToUser(User *user, std::string msg) {
 		}
 	}
 }
-
 
 /* ===== UTILS ===== */
 
@@ -574,9 +573,6 @@ void Server::cmdList(User *user, std::string cmd) {
 }
 
 void Server::cmdJoin(User *user, std::string cmd) {
-	// ! REPLACE USER BY CHANNEL
-	std::vector<Channel>::iterator it = _channels.begin();
-	int tmp;
 	std::vector<std::string> usrlist;
 
 	std::string channel = cmd.substr(5);
@@ -587,20 +583,63 @@ void Server::cmdJoin(User *user, std::string cmd) {
 		std::cout << RED << BOLD << "Missing channel name." << RESET << std::endl << std::endl;
 		sendToUser(user, "Error: missing channel name.");
 		return;
+	} 
+	if (channel[0] != '#') {
+		std::cout << RED << BOLD << "Wrong parameter (/join #channel)." << RESET << std::endl << std::endl;
+		sendToUser(user, "Error: wrong parameter (/join #channel).");
+		return;
 	}
-	else if ((_channels.size() == 0) || (findChan(_channels, channel) == -1)) {
-		_channels.push_back(channel);
-		std::cout << GREEN << BOLD << "Channel " << channel << " created." << RESET << std::endl << std::endl;
-		sendToUser(user, "Channel " + channel + " created.");
-		it = _channels.end()--;
-		it->addUsr(user);
-		std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl; 
+	channel = channel.substr(1);
+	//Search channel and join if exist
+	if (_channels.size() != 0) {
+		std::vector<Channel>::iterator it = _channels.begin();
+		while (it != _channels.end()) {
+			if (it->getName() == channel){
+				if (!user->channelLimit()) {
+					std::cout << RED << BOLD << "Too many channel joined." << RESET << std::endl << std::endl;
+					sendToUser(user, "Too many channel joined.");
+					return;
+				}
+				if (it->checkExist(user)) { //If user already exists
+					it->addUsr(user);
+					user->increaseChannelNo();
+				}
+				std::string msg = ":" + user->getNickname() + " JOIN " + channel + "\r\n";
+				send(user->getFd(), msg.c_str(), msg.length(), 0);
+				return;
+			}
+			it++;
+		}
 	}
-	else if (findChan(_channels, channel) >= 0)
-	{
-		tmp = findChan(_channels, channel);
-		_channels[tmp].addUsr(user);
-		std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl;
+	//else create a new channel and join
+	if (!user->channelLimit()) {
+		std::cout << RED << BOLD << "Too many channel joined." << RESET << std::endl << std::endl;
+		sendToUser(user, "Too many channel joined.");
+		return;
+	}
+	Channel *newChan = new Channel(channel);
+	newChan->addUsr(user);
+	_channels.push_back(*newChan);
+	user->setIsOperator();
+	user->increaseChannelNo();
+
+	std::string msg = ":" + user->getNickname() + " JOIN " + channel + "\r\n";
+	send(user->getFd(), msg.c_str(), msg.length(), 0);
+
+
+	// else if ((_channels.size() == 0) || (findChan(_channels, channel) == -1)) {
+	// 	_channels.push_back(channel);
+	// 	std::cout << GREEN << BOLD << "Channel " << channel << " created." << RESET << std::endl << std::endl;
+	// 	sendToUser(user, "Channel " + channel + " created.");
+	// 	it = _channels.end()--;
+	// 	it->addUsr(user);
+	// 	std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl; 
+	// }
+	// else if (findChan(_channels, channel) >= 0)
+	// {
+	// 	tmp = findChan(_channels, channel);
+	// 	_channels[tmp].addUsr(user);
+	// 	std::cout << GREEN << BOLD << user->getNickname() << " joined " << channel << RESET << std::endl << std::endl;
 
 
 		/***********************************************************************/
@@ -620,7 +659,7 @@ void Server::cmdJoin(User *user, std::string cmd) {
 		// 	tmp++;
 		// }
 		/*************************************************************************/
-	}
+	// }
 	// tmp = 0; 
 	// while (tmp < static_cast<int>(usrlist.size()) && usrlist.size() != 0)
 	// {
@@ -646,7 +685,6 @@ void Server::cmdJoin(User *user, std::string cmd) {
 	// _channels.push_back(chan);
 
 }
-
 
 // i wish i could do it other wise, without an int, but return a Channel;
 int Server::findChan(std::vector<Channel> const _channels, std::string const name) const {

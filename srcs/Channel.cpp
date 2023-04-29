@@ -16,11 +16,11 @@
 
 Channel::Channel(std::string name): _name(name)
 {
-    std::cout << "Channel default constructor called" << std::endl;
+    // std::cout << "Channel default constructor called" << std::endl;
 }
 Channel::~Channel()
 {
-    std::cout << "Channel default destructor called" << std::endl;
+    // std::cout << "Channel default destructor called" << std::endl;
     
 }
 
@@ -51,3 +51,14 @@ std::vector<std::string> Channel::getChanUsrs() const {
 //     if (_usrs.size() != 0 && !_usrs[i].empty())
 //         return &_usrs[i];
 // }
+
+bool Channel::checkExist(User *user){
+    std::vector<User>::iterator it = _usrs.begin();
+    while (it != _usrs.end()) {
+        if (it->getUsername() == user->getUsername()) {
+            std::cout<<"Already joined this channel."<<std::endl;
+            return true;
+        }
+    }
+    return false;
+}

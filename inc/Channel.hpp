@@ -25,6 +25,7 @@ public:
     void addUsr(User * user);
     std::string getName() const;
     std::vector<std::string> getChanUsrs() const ;
+    bool checkExist(User *user);
     // User    * getChanUsr(int i) const;
     
 
