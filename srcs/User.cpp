@@ -25,7 +25,6 @@ User::User(pollfd Client, int fd, int socket) {
     this->noChannels = 0;
     this->_client = Client;
     this->passOk = false;
-    this->isOperator = false;
 }
 
 User User::USER(std::string username) {
@@ -47,10 +46,6 @@ std::string User::getNickname() const {
 }
 std::string User::getPassword() const {
     return this->_password;
-}
-
-int     User::getChannelNo() const {
-    return this->noChannels;
 }
 
 int     User::getFd() const {
@@ -113,8 +108,6 @@ void    User::setWhatChannel(std::string channelName) {
 void    User::setPassOk(int ok) {
     this->passOk = ok;
 }
-
-void    User::setIsOperator() {this->isOperator = true;}
 
 // Commands
 bool    User::channelLimit() {

@@ -35,7 +35,6 @@ public:
 
     int     getFd() const;
     int     getSocket() const;
-    int     getChannelNo() const;
     bool    getVerification();
     bool    getUserVerification();
     bool    getChannelVerification();
@@ -56,7 +55,6 @@ public:
     void    setisInChannel(int n);
     void    setWhatChannel(std::string channelName);
     void    setPassOk(int ok);
-    void    setIsOperator();
     
     // Commands
     bool    channelLimit();
@@ -77,7 +75,6 @@ private:
     bool        userIsVerified;
     bool        isInChannel;
     bool        passOk;
-    bool        isOperator;
 
     std::string whatChannel;
     int noChannels;

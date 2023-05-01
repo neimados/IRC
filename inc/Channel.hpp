@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/04/26 18:47:45 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/01 17:43:57 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,14 +25,14 @@ public:
     void addUsr(User * user);
     std::string getName() const;
     std::vector<std::string> getChanUsrs() const ;
-    bool checkExist(User *user);
-    // User    * getChanUsr(int i) const;
-    
+    User * getChanUsr(int i);
+
+    std::vector<User> &    get_usrs();
 
 private:
 
     std::string _name;
-    std::vector<User>		_usrs;
+    std::vector<User>         _usrs;
 
     // std::vector<string>      _Sended // buffer
     //ou

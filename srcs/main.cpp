@@ -54,6 +54,11 @@ int main(int ac, char **av) {
 
     try {
         if (port >= 0 && port <= 65535) {
+            // Parsing dans la classe IRC avec check necessaire
+            // Une grosse classe qui va contenir des objets des autres classes
+            // Irc irc(port, av[2]);
+
+            // classe serveur test
             Server srv(port, av[2]);
             
             srv.startSrv();
