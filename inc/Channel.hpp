@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/01 17:43:57 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/03 10:55:51 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,16 +22,24 @@ class Channel {
 public:
     Channel(std::string name);
     ~Channel();
-    void addUsr(User * user);
+    
+    void addUsr(User *user);
+    void delUsr(User *user);
+    
     std::string getName() const;
-    std::vector<std::string> getChanUsrs() const ;
+    std::string getTopic() const;
+    std::vector<std::string> getChanUsrs() const;
+    
     User * getChanUsr(int i);
 
-    std::vector<User> &    get_usrs();
+    void setTopic(std::string topic);
+
+    // std::vector<User> &    get_usrs();
 
 private:
 
     std::string _name;
+    std::string _topic;
     std::vector<User>         _usrs;
 
     // std::vector<string>      _Sended // buffer

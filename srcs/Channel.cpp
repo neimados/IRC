@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/01 17:43:59 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/03 15:24:28 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,8 @@
 #include "../inc/Channel.hpp"
 #include "../inc/User.hpp"
 
-Channel::Channel(std::string name): _name(name)
-{
-    std::cout << "Channel default constructor called" << std::endl;
-}
-Channel::~Channel()
-{
-    std::cout << "Channel default destructor called" << std::endl;
-    
-}
+Channel::Channel(std::string name): _name(name), _topic("") {}
+Channel::~Channel() {}
 
 std::string Channel::getName() const {
     return this->_name;
@@ -30,6 +23,27 @@ std::string Channel::getName() const {
 
 void Channel::addUsr(User * user) {
     _usrs.push_back(*user);
+}
+
+void Channel::delUsr(User *usr) {
+    // Parcours du vecteur de User
+    for (size_t i = 0; i < this->_usrs.size(); i++)
+    {
+        if (this->_usrs[i].getNickname() == usr->getNickname())
+        {
+            // Remove the user from the channel
+            this->_usrs.erase(this->_usrs.begin() + i);
+            break;
+        }
+    }
+}
+
+void Channel::setTopic(std::string topic) {
+    this->_topic = topic;
+}
+
+std::string Channel::getTopic() const {
+    return this->_topic;
 }
 
 std::vector<std::string> Channel::getChanUsrs() const {

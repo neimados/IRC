@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/24 19:19:05 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/02 11:37:32 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ public:
     std::string getUsername() const;
     std::string getNickname() const;
     std::string getPassword() const;
+    std::string getHostname() const;
 
     int     getFd() const;
     int     getSocket() const;
@@ -55,6 +56,7 @@ public:
     void    setisInChannel(int n);
     void    setWhatChannel(std::string channelName);
     void    setPassOk(int ok);
+    void    setHostname(std::string hostname);
     
     // Commands
     bool    channelLimit();
@@ -69,6 +71,7 @@ private:
     std::string _username;
     std::string _nickname;
     std::string _password;
+    std::string _hostname;
     std::string _cmd;
 
     bool        isVerified;

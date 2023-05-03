@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/25 19:27:55 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/03 15:51:04 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,20 @@ public:
 	void	disconnectUser(User *user);
 	void	execCmd(User *user, std::string cmd);
 	void	sendToUser(User *user, std::string msg);
+	void	sendToChan(User *user, std::string msg);
+	void	sendUserInChan(User *user, std::string chan);
+	void	sendAllUsersInChan(std::string chan, std::string msg);
+	void	sendPrivMsgFromServer(User *user, std::string msg);
+	void	sendToUserInChan(User *user, int code, std::string chan, std::string msg);
 	
 	
 	/* ===== UTILS ===== */
 	int checkWritable(int fd);
+	int findChan(std::string const name) const;
 	
 	void	displayWelcome(User *user);
 	void	displayWrongPass(User *user);
+	void	sendAllIfInChannel(User *user, std::string msg);
 
 
 	/* ===== GETTERS ===== */
@@ -87,8 +94,6 @@ public:
 
 	std::string	getTime() const;
 	std::string	getPassword() const;
-	int findChan(std::vector<Channel> const _chans, std::string const name) const;
-
 
 
 	/* ===== COMMANDS ===== */
@@ -100,7 +105,9 @@ public:
 	void cmdJoin(User *user, std::string cmd);
 	void cmdPing(User *user, std::string cmd);
 	void cmdCap(User *user, std::string cmd);
+	void cmdTopic(User *user, std::string cmd);
 	void cmdNames(User *user, std::string cmd);
+	void cmdPart(User *user, std::string cmd);
 	
 
 	/* ===== ERRORS ===== */
@@ -126,6 +133,5 @@ private:
 	std::string				_Port;
 	std::string				_password;
 	std::vector<User>		_usrs;
-	std::vector<User>		_chans; // Update User to Chanel
 	std::vector<Channel>	_channels;
 };

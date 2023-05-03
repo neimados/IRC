@@ -15,13 +15,13 @@
 - ✅ USER
 - ✅ PING
 - ✅ QUIT
-- 🚧 LIST          (channel)
-- 🚧 JOIN          (channel)
-- 🚧 NAMES         (channel)
+- ✅ LIST          (channel)
+- ✅ JOIN          (channel)
+- ✅ PART          (channel)
+- ✅ NAMES         (channel)
+- ✅ TOPIC         (channel)
 - PRIVMSG       (message)
 - NOTICE        (message)
 - KICK          (channel)
 - INVITE        (channel)
-- PART          (channel)
-- TOPIC         (channel)
 - MODE          (channel and user)

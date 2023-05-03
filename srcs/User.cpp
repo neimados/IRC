@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/04/24 19:25:36 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/02 11:37:48 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,9 @@ std::string User::getNickname() const {
 }
 std::string User::getPassword() const {
     return this->_password;
+}
+std::string User::getHostname() const {
+    return this->_hostname;
 }
 
 int     User::getFd() const {
@@ -107,6 +110,9 @@ void    User::setWhatChannel(std::string channelName) {
 }
 void    User::setPassOk(int ok) {
     this->passOk = ok;
+}
+void    User::setHostname(std::string hostname) {
+    this->_hostname = hostname;
 }
 
 // Commands
