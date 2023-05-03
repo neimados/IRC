@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/03 15:51:04 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/03 18:28:03 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,8 @@ public:
 	void	disconnectUser(User *user);
 	void	execCmd(User *user, std::string cmd);
 	void	sendToUser(User *user, std::string msg);
-	void	sendToChan(User *user, std::string msg);
 	void	sendUserInChan(User *user, std::string chan);
 	void	sendAllUsersInChan(std::string chan, std::string msg);
-	void	sendPrivMsgFromServer(User *user, std::string msg);
 	void	sendToUserInChan(User *user, int code, std::string chan, std::string msg);
 	
 	
@@ -108,6 +106,8 @@ public:
 	void cmdTopic(User *user, std::string cmd);
 	void cmdNames(User *user, std::string cmd);
 	void cmdPart(User *user, std::string cmd);
+	void cmdInvite(User *user, std::string cmd);
+	void cmdKick(User *user, std::string cmd);
 	
 
 	/* ===== ERRORS ===== */
