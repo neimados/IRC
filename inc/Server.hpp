@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/03 18:28:03 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/04 17:34:49 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ public:
 	void cmdPart(User *user, std::string cmd);
 	void cmdInvite(User *user, std::string cmd);
 	void cmdKick(User *user, std::string cmd);
+	void cmdPrivmsg(User *user, std::string cmd);
 	
 
 	/* ===== ERRORS ===== */

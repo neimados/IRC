@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/03 18:44:58 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/04 17:51:05 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,6 +162,7 @@ void Server::addUser() {
 void	Server::parseCmd(int fd){
 	char						buf[MAX_BUFFER];
 	std::vector<User>::iterator it;
+	(void) it;
 
 	User 						*user;
 	std::string			nickname;
@@ -268,7 +269,10 @@ void Server::execCmd(User *user, std::string cmd) {
 		this->cmdInvite(user, cmd);
 	} else if (cmd.substr(0, 4) == "KICK") {
 		this->cmdKick(user, cmd);
-	} else {
+	} else if (cmd.substr(0, 7) == "PRIVMSG") {
+		this->cmdPrivmsg(user, cmd);
+	}
+	else {
 		std::cout << RED << BOLD << "Command not found." << RESET << std::endl << std::endl;
 		sendToUser(user, "Command not found.");
 	}
@@ -565,7 +569,7 @@ void Server::cmdNick(User *user, std::string cmd) {
 
 void Server::cmdPass(User *user, std::string cmd) {
 	std::vector<User>::iterator it;
-	
+	(void) it;
 	for (size_t i = 0; i < cmd.size(); i++) {
 		if (cmd[i] == ' ') {
 			cmd.erase(i, 1);
@@ -736,6 +740,46 @@ void Server::cmdJoin(User *user, std::string cmd) {
 		// Send the NAMES message to the user
 		cmdNames(user, channels[i]);
 	}	
+}
+
+void Server::cmdPrivmsg(User *user, std::string cmd) {
+
+	std::string nick;
+	std::string msg;
+	int i = 8;
+	int j = i;
+	int tmp = 0;
+
+	if (cmd[7] != ' ' || isalnum(cmd[8]) == 0)
+	{
+		std::cout << "Wrong command PRIVMSG" << std::endl; 
+		return; // error;
+	}
+	while (isalnum(cmd[j]) || cmd[j] == '_')
+		j++;
+	if (cmd[j] != ':')
+	{
+		std::cout << "Wrong command PRIVMSG" << std::endl; 
+		return; // error;
+	
+	}
+	nick = cmd.substr(8, j - i);
+	j++;
+	i = j;
+	while (cmd[j])
+		j++;
+	msg = cmd.substr(i, j - i);
+	while ((tmp <  static_cast<int>(_usrs.size()) && _usrs[tmp].getNickname() != nick) )
+		tmp++;
+	if (tmp == static_cast<int>(_usrs.size()))
+	{
+		sendToUser(user, nick + " not found");
+		std::cout << nick + " not found" << std::endl;
+		return;
+	}
+	else
+		sendToUser(&_usrs[tmp], user->getUsername() + ":" + msg);
+	msg = "";
 }
 
 void Server::cmdPart(User *user, std::string cmd) {
