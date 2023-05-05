@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/04 17:51:05 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/05 18:19:21 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -365,6 +365,16 @@ int Server::findChan(std::string const name) const {
 	return -1;
 }
 
+int Server::findUser(std::string const name) const {
+	for (size_t i = 0; i < _usrs.size(); i++)
+	{
+		if(_usrs[i].getNickname() == name)
+			return i;
+	}
+	return -1;
+}
+
+
 void Server::displayWelcome(User *user) {
 	sendToUser(user, " _       __     __                             ______         ________  ______");
 	sendToUser(user, "| |     / /__  / /________  ____ ___  ___     /_  __/___     /  _/ __ \\/ ____/");
@@ -710,6 +720,7 @@ void Server::cmdJoin(User *user, std::string cmd) {
 			channel_end = cmd.size();
 			
 		std::string channel = cmd.substr(channel_start, channel_end - channel_start);
+		std::cout << "channel dans join = " << channel << std::endl;
 		channels.push_back(channel);
 		channel_start = cmd.find_first_of("#", channel_end);
 	}
@@ -717,6 +728,7 @@ void Server::cmdJoin(User *user, std::string cmd) {
 	// Join the channel(s)
 	for (size_t i = 0; i < channels.size(); i++) {
 		channels[i] = clearString(channels[i]);
+		std::cout << "channel after clear = " << channels[i] << std::endl;
 		// Check if the channel already exists
 		int chan_index = findChan(channels[i]);
 		
@@ -744,41 +756,69 @@ void Server::cmdJoin(User *user, std::string cmd) {
 
 void Server::cmdPrivmsg(User *user, std::string cmd) {
 
-	std::string nick;
 	std::string msg;
-	int i = 8;
-	int j = i;
-	int tmp = 0;
-
-	if (cmd[7] != ' ' || isalnum(cmd[8]) == 0)
-	{
-		std::cout << "Wrong command PRIVMSG" << std::endl; 
-		return; // error;
-	}
-	while (isalnum(cmd[j]) || cmd[j] == '_')
-		j++;
-	if (cmd[j] != ':')
-	{
-		std::cout << "Wrong command PRIVMSG" << std::endl; 
-		return; // error;
-	
-	}
-	nick = cmd.substr(8, j - i);
-	j++;
-	i = j;
-	while (cmd[j])
-		j++;
-	msg = cmd.substr(i, j - i);
-	while ((tmp <  static_cast<int>(_usrs.size()) && _usrs[tmp].getNickname() != nick) )
-		tmp++;
-	if (tmp == static_cast<int>(_usrs.size()))
-	{
-		sendToUser(user, nick + " not found");
-		std::cout << nick + " not found" << std::endl;
-		return;
-	}
+	std::string::size_type msg_start;
+	cmd.erase(0, 8);
+	msg_start = cmd.find_first_of(":");
+	if (msg_start == std::string::npos)
+			return; // error;
 	else
-		sendToUser(&_usrs[tmp], user->getUsername() + ":" + msg);
+		msg = cmd.substr(msg_start + 1, cmd.size());
+	std::string cmdtmp;
+	cmdtmp = cmd.substr(0, cmd.find_first_of(":"));
+
+	// look for the channels
+	std::vector<std::string> channels;
+	std::string::size_type channel_start = cmdtmp.find_first_of("#");
+	while (channel_start != std::string::npos){
+		// Set channel_end to the first space or , after channel_start
+		std::string::size_type channel_end = cmdtmp.find_first_of(" ,", channel_start);
+		
+		if (channel_end == std::string::npos)
+			channel_end = cmdtmp.size();	
+		std::string channel = cmdtmp.substr(channel_start, channel_end - channel_start);
+		std::cout << "channel dans join = " << channel << std::endl;
+		channels.push_back(channel);
+		cmdtmp = cmdtmp.substr(0, channel_start) + " " + cmdtmp.substr(channel_end, cmdtmp.size() - channel_end);
+		channel_start = cmdtmp.find_first_of("#", channel_end);
+	}
+	for (size_t i = 0; i < channels.size(); i++) {
+		channels[i] = clearString(channels[i]);
+		// Check if the channel already exists
+		int chan_index = findChan(channels[i]);
+		if (chan_index == -1) {
+			// channel dont existe;
+			sendToUser(user, "401 " + channels[i] + ":No such chan");
+		}
+		// Send the JOIN message to the channel
+		sendAllUsersInChan(channels[i], user->getNickname() + " PRIVMSG " + channels[i] + ":" + msg);
+	}
+	std::cout << "cmd tmp = " << cmd << std::endl;
+
+	// look for the users;
+	std::vector<std::string> users;
+	std::string::size_type user_start = 0;
+	while (user_start != std::string::npos){
+		std::string::size_type user_end = cmdtmp.find_first_of(" ,", channel_start);
+
+		if (user_end == std::string::npos)
+			user_end = cmdtmp.size();	
+		std::string user = cmdtmp.substr(user_start, user_end - user_start);
+		users.push_back(user);
+		cmdtmp = cmdtmp.substr(0, user_start) + " " + cmdtmp.substr(user_end, cmdtmp.size() - user_end);
+		user_start = 0;
+	}
+	for (size_t i = 0; i < channels.size(); i++) {
+		users[i] = clearString(users[i]);
+		// Check if the channel already exists
+		int user_index = findUser(users[i]);
+		if (user_index == -1)
+			// user not found;
+			sendToUser(user, "401 " + users[i] + ":No such nick");
+		// Send the JOIN message to the user
+		else
+			sendToUser(&_usrs[user_index], user->getNickname() + " PRIVMSG " + _usrs[user_index].getNickname() + ":" + msg);
+	}
 	msg = "";
 }
 

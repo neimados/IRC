@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/04 17:34:49 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/05 17:50:28 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ public:
 	/* ===== UTILS ===== */
 	int checkWritable(int fd);
 	int findChan(std::string const name) const;
+	int findUser(std::string const name) const;
 	
 	void	displayWelcome(User *user);
 	void	displayWrongPass(User *user);
