@@ -6,7 +6,7 @@
 /*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/05 18:19:21 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/05 19:39:26 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -794,32 +794,31 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 		sendAllUsersInChan(channels[i], user->getNickname() + " PRIVMSG " + channels[i] + ":" + msg);
 	}
 	std::cout << "cmd tmp = " << cmd << std::endl;
-
 	// look for the users;
-	std::vector<std::string> users;
-	std::string::size_type user_start = 0;
-	while (user_start != std::string::npos){
-		std::string::size_type user_end = cmdtmp.find_first_of(" ,", channel_start);
+	// std::vector<std::string> users;
+	// std::string::size_type user_start = 0;
+	// while (user_start != std::string::npos){
+	// 	std::string::size_type user_end = cmdtmp.find_first_of(" ,", channel_start);
 
-		if (user_end == std::string::npos)
-			user_end = cmdtmp.size();	
-		std::string user = cmdtmp.substr(user_start, user_end - user_start);
-		users.push_back(user);
-		cmdtmp = cmdtmp.substr(0, user_start) + " " + cmdtmp.substr(user_end, cmdtmp.size() - user_end);
-		user_start = 0;
-	}
-	for (size_t i = 0; i < channels.size(); i++) {
-		users[i] = clearString(users[i]);
-		// Check if the channel already exists
-		int user_index = findUser(users[i]);
-		if (user_index == -1)
-			// user not found;
-			sendToUser(user, "401 " + users[i] + ":No such nick");
-		// Send the JOIN message to the user
-		else
-			sendToUser(&_usrs[user_index], user->getNickname() + " PRIVMSG " + _usrs[user_index].getNickname() + ":" + msg);
-	}
-	msg = "";
+	// 	if (user_end == std::string::npos)
+	// 		user_end = cmdtmp.size();	
+	// 	std::string user = cmdtmp.substr(user_start, user_end - user_start);
+	// 	users.push_back(user);
+	// 	cmdtmp = cmdtmp.substr(0, user_start) + " " + cmdtmp.substr(user_end, cmdtmp.size() - user_end);
+	// 	user_start = 0;
+	// }
+	// for (size_t i = 0; i < users.size(); i++) {
+	// 	users[i] = clearString(users[i]);
+	// 	// Check if the channel already exists
+	// 	int user_index = findUser(users[i]);
+	// 	if (user_index == -1)
+	// 		// user not found;
+	// 		sendToUser(user, "401 " + users[i] + ":No such nick");
+	// 	// Send the JOIN message to the user
+	// 	else
+	// 		sendToUser(&_usrs[user_index], user->getNickname() + " PRIVMSG " + _usrs[user_index].getNickname() + ":" + msg);
+	// }
+	// msg = "";
 }
 
 void Server::cmdPart(User *user, std::string cmd) {
