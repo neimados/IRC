@@ -60,7 +60,6 @@ public:
     
     // Commands
     bool    channelLimit();
-
     void    increaseChannelNo();
     void    decreaseChannelNo();
 
@@ -84,5 +83,4 @@ private:
 
     // User(const User &u);
     // User &operator=(const User &u);
-
 };
