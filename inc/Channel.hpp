@@ -24,7 +24,7 @@ public:
     ~Channel();
     
     void addUsr(User *user);
-    void delUsr(User *user);
+    bool delUsr(User *user);
     
     std::string getName() const;
     std::string getTopic() const;

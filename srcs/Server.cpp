@@ -178,7 +178,7 @@ void	Server::parseCmd(int fd){
 
 	if (recv(clientFd, buf, MAX_BUFFER, 0) <= 0) {
 		// Connection closed by client
-		disconnectUser(user);
+		disconnectUser(user, fd);
 	} else {
 		// Command received from client
 		std::string cmd(buf);
@@ -190,39 +190,50 @@ void	Server::parseCmd(int fd){
 			
 			while ((pos = cmd.find(delimiter)) != std::string::npos) {
 				token = cmd.substr(0, pos);
-				execCmd(user, token);
+				execCmd(user, token, fd);
 				cmd.erase(0, pos + delimiter.length());
 			}
 		} else {
-			execCmd(user, cmd);
+			execCmd(user, cmd, fd);
 		}
 	}
 	
 	memset(&buf, 0, MAX_BUFFER); // Reset du buffer
 }
 
-void	Server::disconnectUser(User *user) {
-	std::vector<User>::iterator it;
+void	Server::disconnectUser(User *user, int fd) {
+	std::vector<User>::iterator itUser;
+	
+	//pour quitter tous les channels
+	std::vector<Channel>::iterator itChan = _channels.begin();
+	while (itChan != _channels.end()){
+		if (itChan->delUsr(user))
+			sendAllUsersInChan(itChan->getName(), user->getNickname() + " PART " + itChan->getName());
+		++itChan;
+	}
+
 	
 	// A loop to find the user in the vector and delete it
-	for (it = _usrs.begin(); it != _usrs.end(); it++) {
-		if (it->getFd() == user->getFd()) {
-			// Quit the channel
-			if (it->getisInChannel() == true && it->getWhatChannel().size() > 0) {
-				int chan_index = findChan(it->getWhatChannel());
+	for (itUser = _usrs.begin(); itUser != _usrs.end(); itUser++) {
+		if (itUser->getFd() == user->getFd()) {
+			// // Quit the channel
+			// if (it->getisInChannel() == true && it->getWhatChannel().size() > 0) {
+			// 	int chan_index = findChan(it->getWhatChannel());
 
-				if (chan_index != -1) {
-					_channels[chan_index].delUsr(&(*it));
-					sendAllUsersInChan(_channels[chan_index].getName(), user->getNickname() + " PART " + _channels[chan_index].getName());
-				}
-			}
+			// 	if (chan_index != -1) {
+			// 		_channels[chan_index].delUsr(&(*it));
+			// 		sendAllUsersInChan(_channels[chan_index].getName(), user->getNickname() + " PART " + _channels[chan_index].getName());
+			// 	}
+			// }
 			
 			// Close the socket
+			_fds[fd].fd = _fds[_nbUsers - 1].fd;
 			close(user->getFd());
-			_usrs.erase(it);
+			_usrs.erase(itUser);
 			break;
 		}
 	}
+
 	
 	// Update the pollfd array
 	_nbUsers--;
@@ -232,19 +243,19 @@ void	Server::disconnectUser(User *user) {
 	std::cout << " on socket " << ITALIC << user->getSocket() << RESET << YELLOW << " disconnected at " << this->getTime() << RESET << std::endl;
 }
 
-void Server::execCmd(User *user, std::string cmd) {
+void Server::execCmd(User *user, std::string cmd, int fd) {
 	std::cout << BOLD << user->getNickname() << ": " << RESET << cmd <<std::endl;
 
 	if (user->getPassOk() == false && cmd.substr(0, 4) != "PASS") {
 		sendToUser(user, "User not connected yet. Please use PASS command first.");
 		std::cout << RED << BOLD << "User " << user->getNickname() << " not connected yet ; PASS command not used." << RESET << std::endl;
-		disconnectUser(user);
+		disconnectUser(user, fd);
 		return;
 	}
 	
 	if (cmd.substr(0, 4) == "PASS") {
 		//check password. If ok getPassOk() = true
-		this->cmdPass(user, cmd);
+		this->cmdPass(user, cmd, fd);
 	} else if (cmd.substr(0, 4) == "NICK") {
 		this->cmdNick(user, cmd);
 	} else if (cmd.substr(0, 4) == "USER") {
@@ -256,7 +267,7 @@ void Server::execCmd(User *user, std::string cmd) {
 	} else if (cmd.substr(0, 4) == "LIST") {
 		this->cmdList(user, cmd);
 	} else if (cmd.substr(0, 4) == "QUIT") {
-		this->cmdQuit(user, cmd);
+		this->cmdQuit(user, cmd, fd);
 	} else if (cmd.substr(0, 4) == "JOIN") {
 		this->cmdJoin(user, cmd);
 	} else if (cmd.substr(0, 5) == "NAMES") {
@@ -467,13 +478,14 @@ std::string Server::getPassword() const {
 
 /* ===== COMMANDS ===== */
 
-void Server::cmdQuit(User *user, std::string cmd) {
+void Server::cmdQuit(User *user, std::string cmd, int fd) {
 	std::string msg = "";
 	
 	if (cmd.size() > 6)
 		msg = cmd.substr(6);
 	
 	std::cout << "Command QUIT received from " << BOLD << user->getNickname() << RESET << " with message: " << ITALIC << msg << RESET << std::endl;
+	disconnectUser(user, fd);
 }
 
 void Server::cmdPing(User *user, std::string cmd) {
@@ -597,7 +609,7 @@ void Server::cmdNick(User *user, std::string cmd) {
 			
 }
 
-void Server::cmdPass(User *user, std::string cmd) {
+void Server::cmdPass(User *user, std::string cmd, int fd) {
 	std::vector<User>::iterator it;
 	(void) it;
 	for (size_t i = 0; i < cmd.size(); i++) {
@@ -638,7 +650,7 @@ void Server::cmdPass(User *user, std::string cmd) {
 	} else {
 		sendToUser(user, "Wrong password.");
 		displayWrongPass(user);
-		disconnectUser(user);
+		disconnectUser(user, fd);
 
 		std::cout << RED << BOLD << "Wrong password ; kick user from the server." << RESET << std::endl;
 	}

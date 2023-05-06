@@ -68,8 +68,8 @@ public:
 	void	startSrv();
 	void	addUser();
 	void	parseCmd(int fd);
-	void	disconnectUser(User *user);
-	void	execCmd(User *user, std::string cmd);
+	void	disconnectUser(User *user, int fd);
+	void	execCmd(User *user, std::string cmd, int fd);
 	void	sendToUser(User *user, std::string msg);
 	void	sendUserInChan(User *user, std::string chan);
 	void	sendAllUsersInChan(std::string chan, std::string msg);
@@ -98,10 +98,10 @@ public:
 
 	/* ===== COMMANDS ===== */
 	void cmdList(User *user, std::string cmd);
-	void cmdPass(User *user, std::string cmd);
+	void cmdPass(User *user, std::string cmd, int fd);
 	void cmdNick(User *user, std::string cmd);
 	void cmdUser(User *user, std::string cmd);
-	void cmdQuit(User *user, std::string cmd);
+	void cmdQuit(User *user, std::string cmd, int fd);
 	void cmdJoin(User *user, std::string cmd);
 	void cmdPing(User *user, std::string cmd);
 	void cmdCap(User *user, std::string cmd);

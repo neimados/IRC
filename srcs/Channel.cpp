@@ -25,7 +25,7 @@ void Channel::addUsr(User * user) {
     _usrs.push_back(*user);
 }
 
-void Channel::delUsr(User *usr) {
+bool Channel::delUsr(User *usr) {
     // Parcours du vecteur de User
     for (size_t i = 0; i < this->_usrs.size(); i++)
     {
@@ -33,9 +33,10 @@ void Channel::delUsr(User *usr) {
         {
             // Remove the user from the channel
             this->_usrs.erase(this->_usrs.begin() + i);
-            break;
+            return true;
         }
     }
+    return false;
 }
 
 void Channel::setTopic(std::string topic) {
