@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/07 12:16:00 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/07 22:34:26 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,7 @@ public:
 	void cmdInvite(User *user, std::string cmd);
 	void cmdKick(User *user, std::string cmd);
 	void cmdPrivmsg(User *user, std::string cmd);
+	void cmdNotice(User *user, std::string cmd);
 	
 
 	/* ===== ERRORS ===== */

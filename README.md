@@ -23,3 +23,5 @@
 - ✅ INVITE        (channel)
 - ✅ KICK          (channel)
 - ✅ PRIVMSG       (message)
+- ✅ NOTICE        (message)
+- 🚧 MODE          (channel)

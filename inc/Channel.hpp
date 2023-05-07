@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/07 11:58:50 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/07 22:23:36 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ public:
     std::string getName() const;
     std::string getTopic() const;
     std::string getChanUsrs() const;
+    std::string getNbUsers() const;
     
     User * getChanUsr(int i);
 
