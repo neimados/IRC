@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/07 22:51:03 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/07 23:22:02 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -991,11 +991,14 @@ void Server::cmdTopic(User *user, std::string cmd) {
 		std::cout << RED << BOLD << "Missing channel name." << RESET << std::endl << std::endl;
 		return;
 	}
+	
 	channel = clearString(cmd.substr(channel_start, topic_start - channel_start - 1));
+	
 	if (topic_start != std::string::npos)
 		topic = cmd.substr(topic_start + 1, cmd.size() - topic_start - 1);
-	// Check if the channel exists with a loop
+	
 	int chan_index = findChan(channel);
+	
 	// Print the topic of the channel is it exists and is not empty
 	if (chan_index != -1 && topic.size() == 0) {
 		if (_channels[chan_index].getTopic().size() != 0) {
@@ -1007,17 +1010,23 @@ void Server::cmdTopic(User *user, std::string cmd) {
 		}
 		return;
 	}
+
+	if (user->getWhatChannel() != channel) {
+		// Send the error message to the user
+		sendToUser(user, "Error: you are not in channel " + channel + ".");
+		std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << channel << "." << RESET << std::endl << std::endl;
+		return;
+	}
+	
 	if (chan_index == -1) {
 		// Send the error message to the user
 		sendToUser(user, "Error: channel " + channel + " doesn't exist.");
-
 		std::cout << RED << BOLD << "Channel " << channel << " doesn't exist." << RESET << std::endl << std::endl;
 	} else {
 		_channels[chan_index].setTopic(topic);
 		
 		// Send the TOPIC message to the users
 		sendAllUsersInChan(channel, user->getNickname() + " TOPIC " + channel + " " + topic);
-
 		std::cout << GREEN << BOLD << user->getNickname() << " changed the topic of " << channel << " to " << topic << RESET << std::endl << std::endl;
 	}
 }
@@ -1053,7 +1062,7 @@ void Server::cmdInvite(User *user, std::string cmd) {
 	}
 
 	// Check if user is currently in a channel
-	if (user->getisInChannel() == false || user->getWhatChannel() != channel) {
+	if (user->getWhatChannel() != channel) {
 		// Send the error message to the user
 		sendToUser(user, "Error: you are not in the channel'" + channel + "'.");
 
@@ -1100,7 +1109,6 @@ void Server::cmdKick(User *user, std::string cmd) {
 
 	cmd.erase(0, i + 1); // Remove the channel name from the command
 
-
 	i = 0;
 	// A for loop to get the username and channel name
 	while (i < cmd.size()) {
@@ -1119,6 +1127,13 @@ void Server::cmdKick(User *user, std::string cmd) {
 			cmd.erase(0, 1);
 		}
 		reason = cmd;
+	}
+
+	if (user->getWhatChannel() != channel) {
+		// Send the error message to the user
+		sendToUser(user, "Error: you are not in channel " + channel + ".");
+		std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << channel << "." << RESET << std::endl << std::endl;
+		return;
 	}
 
 	// Check if the channel exists with a loop
@@ -1142,7 +1157,7 @@ void Server::cmdKick(User *user, std::string cmd) {
 			} else {
 				// sendToUserInChan(&_usrs[i], );
 				sendAllUsersInChan(channel, user->getNickname() + " KICK " + channel + " " + username + " :" + reason);
-				sendToUser(&_usrs[i], ":" + user->getNickname() + " KICK " + channel + " " + username + " :" + reason);
+				sendToUser(&_usrs[i], user->getNickname() + " KICK " + channel + " " + username + " :" + reason);
 				
 				// Remove the user from the channel
 				_channels[chan_index].delUsr(&_usrs[i]);
@@ -1198,6 +1213,13 @@ void Server::cmdNotice(User *user, std::string cmd) {
 		// destinataire is a channel
 		// Check if the channel exists with a loop
 		int chan_index = findChan(destinataire);
+
+		if (user->getWhatChannel() != destinataire) {
+			// Send the error message to the user
+			sendToUser(user, "Error: you are not in channel " + destinataire + ".");
+			std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << destinataire << "." << RESET << std::endl << std::endl;
+			return;
+		}
 		
 		if (chan_index == -1) {
 			// Send the error message to the user
