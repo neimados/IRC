@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/02 11:37:48 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/07 11:18:52 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,6 @@ User::User(pollfd Client, int fd, int socket) {
     this->noChannels = 0;
     this->_client = Client;
     this->passOk = false;
-}
-
-User User::USER(std::string username) {
-    this->setUsername(username);
-    this->setUserVerification(1);
-    
-    send(this->getFd(), "\nUsername set to ", 18, 0);
-    send(this->getFd(), this->getUsername().data(), username.size(), 0);
-    send(this->getFd(), "\n", 2, 0);
-    return (*this);
 }
 
 // Getters

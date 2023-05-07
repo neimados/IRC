@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/05 17:50:28 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/07 12:16:00 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,7 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
-// Const defines
-#define MAX_CLIENTS 10
+// Const define
 #define MAX_BUFFER 1024
 
 // Defines colors
@@ -137,4 +136,6 @@ private:
 	std::string				_password;
 	std::vector<User>		_usrs;
 	std::vector<Channel>	_channels;
+
+	static const int								_maxFds = 10;
 };

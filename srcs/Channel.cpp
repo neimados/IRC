@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/03 15:24:28 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/07 11:48:26 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ std::string Channel::getName() const {
 }
 
 void Channel::addUsr(User * user) {
-    _usrs.push_back(*user);
+    // Add the user to the channel
+    this->_usrs.push_back(*user);
 }
 
 bool Channel::delUsr(User *usr) {
@@ -39,6 +40,19 @@ bool Channel::delUsr(User *usr) {
     return false;
 }
 
+void Channel::updateUser(User *user) {
+    // Parcours du vecteur de User
+    for (size_t i = 0; i < this->_usrs.size(); i++)
+    {
+        if (this->_usrs[i].getFd() == user->getFd())
+        {
+            // Update the user in the channel
+            this->_usrs[i] = *user;
+            return ;
+        }
+    }
+}
+
 void Channel::setTopic(std::string topic) {
     this->_topic = topic;
 }
@@ -47,19 +61,17 @@ std::string Channel::getTopic() const {
     return this->_topic;
 }
 
-std::vector<std::string> Channel::getChanUsrs() const {
-    
-    std::vector<std::string> list;
-    int tmp = 0;
+std::string Channel::getChanUsrs() const {
+    std::string list = "";
 
-    if (_usrs.size() == 0)
-        return (list);
-    while (tmp < static_cast<int>(_usrs.size()))
+    for (size_t i = 0; i < this->_usrs.size(); i++)
     {
-        list.push_back(_usrs[tmp].getNickname());
-        tmp++;
+        list += this->_usrs[i].getNickname();
+        if (i < this->_usrs.size() - 1)
+            list += " ";
     }
-    return (list);
+
+    return list;
 }
 
 // need to corecte the condition to avoid segfault;

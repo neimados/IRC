@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/02 11:37:32 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/07 11:18:59 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,6 @@ public:
     User();
     User(pollfd Client, int fd, int socket);
     ~User();
-    
-    User    USER(std::string username);
-    User    NICK(std::string nickname);
 
     // Getters
     std::string getUsername() const;
