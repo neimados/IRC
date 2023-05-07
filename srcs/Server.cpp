@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/07 23:22:02 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/08 01:00:45 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,6 +301,8 @@ void Server::execCmd(User *user, std::string cmd, int fd) {
 		this->cmdPrivmsg(user, cmd);
 	} else if (cmd.substr(0, 6) == "NOTICE") {
 		this->cmdNotice(user, cmd);
+	} else if (cmd.substr(0, 4) == "MODE") {
+		this->cmdMode(user, cmd);
 	} else {
 		std::cout << RED << BOLD << "Command not found." << RESET << std::endl << std::endl;
 		sendToUser(user, "Command not found.");
@@ -736,8 +738,10 @@ void Server::cmdList(User *user, std::string cmd) {
 	
 	// Send the 322 message for each channel
 	for (size_t i = 0; i < _channels.size(); i++) {
-		std::string msg = "IRC 322 " + user->getNickname() + " " + _channels[i].getName() + " " + _channels[i].getNbUsers() + " :" + _channels[i].getTopic();
-		sendUserInChan(user, msg);
+		if (_channels[i].getIsPrivate() == false) {	
+			std::string msg = "IRC 322 " + user->getNickname() + " " + _channels[i].getName() + " " + _channels[i].getNbUsers() + " :" + _channels[i].getTopic();
+			sendUserInChan(user, msg);
+		}
 	}
 
 	// Send the 323 message
@@ -844,7 +848,8 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 		// destinataire is a channel
 		int chan_index = findChan(destinataire);
 
-		if (user->getWhatChannel() != destinataire) {
+		// Check if the user is in the channel or if he is an operator or if channel as externe message
+		if (user->getWhatChannel() != destinataire && user->getIsOperator() == false && _channels[chan_index].getExternalMessage() == false) {
 			// Send the error message to the user
 			sendToUser(user, "Error: you are not in channel " + destinataire + ".");
 			std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << destinataire << "." << RESET << std::endl << std::endl;
@@ -998,6 +1003,13 @@ void Server::cmdTopic(User *user, std::string cmd) {
 		topic = cmd.substr(topic_start + 1, cmd.size() - topic_start - 1);
 	
 	int chan_index = findChan(channel);
+
+	if (_channels[chan_index].getIsTopicSettable() == false && user->getIsOperator() == false) {
+		// Send the error message to the user
+		sendToUser(user, "Error: you are not allowed to change the topic of " + channel + ".");
+		std::cout << RED << BOLD << "User " << user->getNickname() << " is not allowed to change the topic of " << channel << "." << RESET << std::endl << std::endl;
+		return;
+	}
 	
 	// Print the topic of the channel is it exists and is not empty
 	if (chan_index != -1 && topic.size() == 0) {
@@ -1214,7 +1226,9 @@ void Server::cmdNotice(User *user, std::string cmd) {
 		// Check if the channel exists with a loop
 		int chan_index = findChan(destinataire);
 
-		if (user->getWhatChannel() != destinataire) {
+
+		// Check if the user is in the channel or if he is an operator or if channel as externe message
+		if (user->getWhatChannel() != destinataire && user->getIsOperator() == false && _channels[chan_index].getExternalMessage() == false) {
 			// Send the error message to the user
 			sendToUser(user, "Error: you are not in channel " + destinataire + ".");
 			std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << destinataire << "." << RESET << std::endl << std::endl;
@@ -1245,6 +1259,164 @@ void Server::cmdNotice(User *user, std::string cmd) {
 		// Send the error message to the user
 		sendToUser(user, "Error: user " + destinataire + " doesn't exist.");
 		std::cout << RED << BOLD << "User " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;
+	}
+}
+
+void Server::cmdMode(User *user, std::string cmd) {
+	cmd.erase(0, 5); // Remove the "MODE " part of the command
+
+	// Get the channel name or username
+	std::string destinataire;
+	std::string::size_type destinataire_start = cmd.find_first_of("#");
+
+	// destinataire_end is the first space after destinataire_start or the end of the command
+	std::string::size_type destinataire_end = cmd.find_first_of(" ", destinataire_start);
+
+
+	if (destinataire_start != std::string::npos) {
+		// destinataire is a channel
+		destinataire = clearString(cmd.substr(destinataire_start, destinataire_end - destinataire_start));
+	} else {
+		// destinataire is a username
+		destinataire = clearString(cmd.substr(0, destinataire_end));
+	}
+
+	// Get mode from the command if exists
+	std::string mode = "";
+	std::string::size_type mode_start = cmd.find_first_of(" ");
+	
+	if (mode_start != std::string::npos) {
+		mode = cmd.substr(mode_start + 1, cmd.size());
+	}
+
+	std::cout << CYAN << "Command MODE received from " << BOLD << user->getNickname() << RESET << " with mode: " << ITALIC << mode << RESET << std::endl;
+
+	// Check if the destinataire is a channel or a username
+	if (destinataire[0] == '#' && mode.size() == 0) {
+		// destinataire is a channel
+		// Check if the channel exists with a loop
+		int chan_index = findChan(destinataire);
+
+		// Check if the user is in the channel or if he is an operator or if channel as externe message
+		if (user->getWhatChannel() != destinataire && user->getIsOperator() == false && _channels[chan_index].getExternalMessage() == false) {
+			// Send the error message to the user
+			sendToUser(user, "Error: you are not in channel " + destinataire + ".");
+			std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << destinataire << "." << RESET << std::endl << std::endl;
+			return;
+		}
+		
+		if (chan_index == -1) {
+			// Send the error message to the user
+			sendToUser(user, "Error: channel " + destinataire + " doesn't exist.");
+
+			std::cout << RED << BOLD << "Channel " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;
+		} else {
+			// Send the MODE message to the users
+			// sendAllUsersInChan(destinataire, user->getNickname() + " MODE " + destinataire + " " + _channels[chan_index].getMode());
+			sendUserInChan(user, "IRC 324 " +  destinataire + " " + _channels[chan_index].getName() + " " + _channels[chan_index].getMode());
+		}
+	} else if (mode.size() == 0) {
+		// destinataire is a username
+		for (size_t i = 0; i < _usrs.size(); i++) {
+			if (_usrs[i].getNickname() == destinataire) {
+				// Send the MODE message to the user
+				sendUserInChan(user, "IRC 221 " +  destinataire + " " + _usrs[i].getMode());
+				std::cout << GREEN << BOLD << user->getNickname() << " sent a mode to " << destinataire << RESET << std::endl << std::endl;
+				return;
+			}
+		}
+
+		// Send the error message to the user
+		sendToUser(user, "Error: user " + destinataire + " doesn't exist.");
+		std::cout << RED << BOLD << "User " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;	
+		return;
+	}
+
+	// Mode is not empty
+	if (destinataire[0] == '#') {
+		int chan_index = findChan(destinataire);
+
+		if (user->getWhatChannel() != destinataire && user->getIsOperator() == false && _channels[chan_index].getExternalMessage() == false) {
+			// Send the error message to the user
+			sendToUser(user, "Error: you are not in channel " + destinataire + ".");
+			std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << destinataire << "." << RESET << std::endl << std::endl;
+			return;
+		}
+
+		if (chan_index == -1) {
+			// Send the error message to the user
+			sendToUser(user, "Error: channel " + destinataire + " doesn't exist.");
+
+			std::cout << RED << BOLD << "Channel " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;
+		} else {
+			// Check if the mode is valid
+			if (mode.size() > 3) {
+				// Send the error message to the user
+				sendToUser(user, "Error: invalid mode.");
+				std::cout << RED << BOLD << "Invalid mode." << RESET << std::endl << std::endl;
+				return;
+			}
+
+			// Check if the mode is valid
+			if (mode[0] != '+' && mode[0] != '-') {
+				// Send the error message to the user
+				sendToUser(user, "Error: invalid mode.");
+				std::cout << RED << BOLD << "Invalid mode." << RESET << std::endl << std::endl;
+				return;
+			}
+
+			// Check if the mode is valid : o v m n p t
+			if (mode[1] != 'o' && mode[1] != 'v' && mode[1] != 'm' && mode[1] != 'n' && mode[1] != 'p' && mode[1] != 't') {
+				// Send the error message to the user
+				sendToUser(user, "Error: invalid mode.");
+				std::cout << RED << BOLD << "Invalid mode." << RESET << std::endl << std::endl;
+				return;
+			}
+			
+			if (mode.substr(0, 2) == "-o") {
+				user->setIsOperator(false);
+				std::cout << GREEN << BOLD << user->getNickname() << " is not an operator. " << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "+o") {
+				user->setIsOperator(true);
+				std::cout << GREEN << BOLD << user->getNickname() << " is an operator." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "-v") {
+				user->setIsVoiced(false);
+				std::cout << GREEN << BOLD << user->getNickname() << " is not voiced. " << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "+v") {
+				user->setIsVoiced(true);
+				std::cout << GREEN << BOLD << user->getNickname() << " is voiced." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "-m") {
+				_channels[chan_index].setIsModerated(false);
+				std::cout << GREEN << BOLD << destinataire << " is not moderated." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "+m") {
+				_channels[chan_index].setIsModerated(true);
+				std::cout << GREEN << BOLD << destinataire << " is moderated." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "-n") {
+				_channels[chan_index].setExternalMessage(false);
+				std::cout << GREEN << BOLD << destinataire << " is not external message." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "+n") {
+				_channels[chan_index].setExternalMessage(true);
+				std::cout << GREEN << BOLD << destinataire << " is external message." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "-p") {
+				_channels[chan_index].setIsPrivate(false);
+				std::cout << GREEN << BOLD << destinataire << " is not private." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "+p") {
+				_channels[chan_index].setIsPrivate(true);
+				std::cout << GREEN << BOLD << destinataire << " is private." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "-t") {
+				_channels[chan_index].setIsTopicSettable(false);
+				std::cout << GREEN << BOLD << destinataire << " is not topic settable." << RESET << std::endl << std::endl;
+			} else if (mode.substr(0, 2) == "+t") {
+				_channels[chan_index].setIsTopicSettable(true);
+				std::cout << GREEN << BOLD << destinataire << " is topic settable." << RESET << std::endl << std::endl;
+			} else {
+				// Send the error message to the user
+				sendToUser(user, "Error: invalid mode.");
+				std::cout << RED << BOLD << "Invalid mode." << RESET << std::endl << std::endl;
+				return;
+			}
+			sendUserInChan(user, "IRC 324 " +  destinataire + " " + _channels[chan_index].getName() + " " + _channels[chan_index].getMode());
+		}
 	}
 }
 

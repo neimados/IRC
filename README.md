@@ -25,3 +25,27 @@
 - ✅ PRIVMSG       (message)
 - ✅ NOTICE        (message)
 - 🚧 MODE          (channel)
+
+🚧 <!-- Changer de class : User -> Chanel  -->
++o : accorder l'opérateur de chaîne à un utilisateur
+-o : retirer l'opérateur de chaîne à un utilisateur
+
+🚧 <!-- Changer de class : User -> Chanel  -->
++v : donner le droit de voix à un utilisateur sur un canal
+-v : retirer le droit de voix à un utilisateur sur un canal
+
+<!-- PRIVMSG NOTICE cmd -->
++m : mode modéré (seuls les opérateurs de chaîne et les utilisateurs avec la voix peuvent envoyer des messages sur le canal)
+-m : supprimer le mode modéré
+
+<!-- PRIVMSG NOTICE cmd -->
++n : mode interdire les messages externes (seuls les utilisateurs sur le canal peuvent envoyer des messages sur le canal)
+-n : supprimer le mode interdire les messages externes
+
+✅ <!-- LIST cmd -->
++p : mode privé (le canal ne sera pas visible par la commande LIST)
+-p : supprimer le mode privé
+
+✅ <!-- TOPIC cmd -->
++t : mode limiter les sujets (seuls les opérateurs de chaîne peuvent changer le sujet)
+-t : supprimer le mode limiter les sujets

@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/07 11:18:59 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/08 00:27:12 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ public:
     std::string getNickname() const;
     std::string getPassword() const;
     std::string getHostname() const;
+    std::string getMode() const;
 
     int     getFd() const;
     int     getSocket() const;
@@ -37,6 +38,8 @@ public:
     bool    getUserVerification();
     bool    getChannelVerification();
     bool    getPassOk();
+    bool    getIsOperator() const;
+    bool    getIsVoiced() const;
 
     pollfd  getPollFd();
     int     getisInChannel();
@@ -54,7 +57,9 @@ public:
     void    setWhatChannel(std::string channelName);
     void    setPassOk(int ok);
     void    setHostname(std::string hostname);
-    
+    void    setIsOperator(bool isOperator);
+    void    setIsVoiced(bool isVoiced);
+
     // Commands
     bool    channelLimit();
     void    increaseChannelNo();
@@ -74,6 +79,9 @@ private:
     bool        userIsVerified;
     bool        isInChannel;
     bool        passOk;
+
+    bool        _isOperator;
+    bool        _isVoiced;
 
     std::string whatChannel;
     int noChannels;
