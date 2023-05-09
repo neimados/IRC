@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/08 00:28:22 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/09 15:17:15 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,14 +36,21 @@ public:
     std::string getChanUsrs() const;
     std::string getNbUsers() const;
     std::string getMode() const;
+    std::string getModeUser(User *user) const;
 
-    std::vector<User> getOps() const;
-    std::vector<User> getVoiced() const;
+    bool isOperator(User *user) const;
+    bool isVoiced(User *user) const;
+    bool isInChannel(User *user) const;
     
     User * getChanUsr(int i);
 
     void setTopic(std::string topic);
     void updateUser(User *user);
+
+    void addOperator(User *user);
+    void addVoiced(User *user);
+    void delOperator(User *user);
+    void delVoiced(User *user);
 
     void setExternalMessage(bool externalMessage);
     void setIsModerated(bool isModerated);
@@ -55,6 +62,11 @@ private:
     std::string _name;
     std::string _topic;
     std::vector<User>         _usrs;
+
+    // Vector of int for the operators fd
+    std::vector<int>          _ops;
+    // Vector of int for the voiced fd
+    std::vector<int>          _voiced;
 
     bool _externalMessage;
     bool _isModerated;
