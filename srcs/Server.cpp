@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/09 15:28:41 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/09 16:39:02 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -807,6 +807,16 @@ void Server::cmdJoin(User *user, std::string cmd) {
 
 		// Send the NAMES message to the user
 		cmdNames(user, channels[i]);
+
+		// Send the TOPIC message to the user
+		cmdTopic(user, channels[i]);
+
+		// Check if user is operator or voiced
+		// ! commented because ça bug
+		// if (_channels[chan_index].isOperator(user) == true)
+		// 	sendUserInChan(user, user->getNickname() + " MODE " +channels[i] + " +v " + user->getNickname());
+		// if (_channels[chan_index].isVoiced(user) == true)
+		// 	sendUserInChan(user, user->getNickname() + " MODE " +channels[i] + " +v " + user->getNickname());
 	}	
 
 	if (channels.size() == 0) {
@@ -931,6 +941,11 @@ void Server::cmdPart(User *user, std::string cmd) {
 		} else {
 			// Remove the user from the channel
 			_channels[chan_index].delUsr(user);
+			
+			// Remove privileges
+			_channels[chan_index].delOperator(user, user);
+			_channels[chan_index].delVoiced(user, user);
+			
 			user->setWhatChannel("");
 			user->setisInChannel(false);
 			
@@ -1024,7 +1039,10 @@ void Server::cmdTopic(User *user, std::string cmd) {
 		&& _channels[chan_index].isOperator(user) == false
 	) {
 		// Send the error message to the user
-		sendToUser(user, "Error: you are not allowed to change the topic of " + channel + ".");
+		if (user->getisInChannel())
+			sendToUserInChan(user, 404, user->getWhatChannel(), " you are not allowed to change the topic of " + channel + ".");
+		else
+			sendToUser(user, "Error: you are not allowed to change the topic of " + channel + ".");
 		std::cout << RED << BOLD << "User " << user->getNickname() << " is not allowed to change the topic of " << channel << "." << RESET << std::endl << std::endl;
 		return;
 	}
@@ -1161,7 +1179,11 @@ void Server::cmdKick(User *user, std::string cmd) {
 
 	if (user->getWhatChannel() != channel) {
 		// Send the error message to the user
-		sendToUser(user, "Error: you are not in channel " + channel + ".");
+		if (user->getisInChannel() == false)
+			sendToUser(user, "Error: you are not in channel " + channel + ".");
+		else
+			sendToUserInChan(user, 404, user->getWhatChannel(), " you are not allowed to kick " + username + " from " + channel + ".");
+		
 		std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << channel << "." << RESET << std::endl << std::endl;
 		return;
 	}
@@ -1171,7 +1193,10 @@ void Server::cmdKick(User *user, std::string cmd) {
 	
 	if (chan_index == -1) {
 		// Send the error message to the user
-		sendToUser(user, "Error: channel " + channel + " doesn't exist.");
+		if (user->getisInChannel() == false)
+			sendToUser(user, "Error: channel " + channel + " doesn't exist.");
+		else
+			sendToUserInChan(user, 404, user->getWhatChannel(), " channel " + channel + " doesn't exist.");
 
 		std::cout << RED << BOLD << "Channel doesn't exist." << RESET << std::endl << std::endl;
 		return;
@@ -1185,12 +1210,16 @@ void Server::cmdKick(User *user, std::string cmd) {
 				sendToUser(user, "Error: user " + username + " is not in the channel " + channel + ".");
 				std::cout << RED << BOLD << "User " << username << " is not in the channel " << channel << "." << RESET << std::endl << std::endl;
 			} else {
-				// sendToUserInChan(&_usrs[i], );
 				sendAllUsersInChan(channel, user->getNickname() + " KICK " + channel + " " + username + " :" + reason);
 				sendToUser(&_usrs[i], user->getNickname() + " KICK " + channel + " " + username + " :" + reason);
-				
+	
 				// Remove the user from the channel
 				_channels[chan_index].delUsr(&_usrs[i]);
+
+				// Remove privileges
+				_channels[chan_index].delOperator(user, user);
+				_channels[chan_index].delVoiced(user, user);
+			
 				_usrs[i].setWhatChannel("");
 				_usrs[i].setisInChannel(false);
 				
@@ -1298,6 +1327,8 @@ void Server::cmdNotice(User *user, std::string cmd) {
 void Server::cmdMode(User *user, std::string cmd) {
 	cmd.erase(0, 5); // Remove the "MODE " part of the command
 
+	User *sender = user;
+
 	// Get the channel name or username
 	std::string destinataire;
 	std::string::size_type destinataire_start = cmd.find_first_of("#");
@@ -1353,24 +1384,55 @@ void Server::cmdMode(User *user, std::string cmd) {
 		return;
 	} else if (mode.size() == 0) {
 		// destinataire is a username
-		// for (size_t i = 0; i < _usrs.size(); i++) {
-		// 	if (_usrs[i].getNickname() == destinataire) {
-		// 		// Send the MODE message to the user
-		// 		// !sendUserInChan(user, "IRC 221 " +  destinataire + " " + _usrs[i].getMode());
-		// 		std::cout << GREEN << BOLD << user->getNickname() << " sent a mode to " << destinataire << RESET << std::endl << std::endl;
-		// 		return;
-		// 	}
-		// }
+		int user_index = findUser(destinataire);
 
-		// // Send the error message to the user
-		// sendToUser(user, "Error: user " + destinataire + " doesn't exist.");
-		// std::cout << RED << BOLD << "User " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;	
-		// return;
+		if (user_index == -1) {
+			// Send the error message to the user
+			sendToUser(user, "Error: user " + destinataire + " doesn't exist.");
+			std::cout << RED << BOLD << "User " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;
+		} else {
+			int chan_index = findChan(_usrs[user_index].getWhatChannel());
+
+			if (chan_index == -1) {
+				// Send the error message to the user
+				sendToUser(user, "Error: channel " + _usrs[user_index].getWhatChannel() + " doesn't exist.");
+				std::cout << RED << BOLD << "Channel " << _usrs[user_index].getWhatChannel() << " doesn't exist." << RESET << std::endl << std::endl;
+			} else {
+				// Send the MODE message to the user
+				sendToUser(user, "IRC 221 " + destinataire + " " + _channels[chan_index].getModeUser(&_usrs[user_index]));
+				std::cout << GREEN << BOLD << "Mode of " << destinataire << ": " << _channels[chan_index].getModeUser(&_usrs[user_index]) << RESET << std::endl << std::endl;
+			}
+		}
+		return;
 	}
 
 	// destinataire is a username
 	if (destinataire[0] != '#') {
 		// Update another user's mode
+
+		// Get username from command : after "MODE " and before the first space
+		std::string username = clearString(cmd.substr(0, mode_start));
+		
+		int user_index = findUser(username);
+		
+		if (user_index == -1) {
+			// Send the error message to the user
+			sendToUser(user, "Error: user " + destinataire + " doesn't exist.");
+			std::cout << RED << BOLD << "User " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;
+		} else {
+			int chan_index = findChan(_usrs[user_index].getWhatChannel());
+
+			if (chan_index == -1) {
+				// Send the error message to the user
+				sendToUser(user, "Error: channel " + _usrs[user_index].getWhatChannel() + " doesn't exist.");
+				std::cout << RED << BOLD << "Channel " << _usrs[user_index].getWhatChannel() << " doesn't exist." << RESET << std::endl << std::endl;
+				return;
+			}
+
+			destinataire = _channels[chan_index].getName();
+			sender = user;
+			user = &_usrs[user_index];
+		}
 	}
 
 	// Mode is not empty
@@ -1420,19 +1482,19 @@ void Server::cmdMode(User *user, std::string cmd) {
 			
 			// User's mode
 			if (mode.substr(0, 2) == "-o") {
-				_channels[chan_index].delOperator(user);
+				_channels[chan_index].delOperator(user, sender);
 				std::cout << GREEN << BOLD << user->getNickname() << " is not an operator. " << RESET << std::endl << std::endl;
 				return;
 			} else if (mode.substr(0, 2) == "+o") {
-				_channels[chan_index].addOperator(user);
+				_channels[chan_index].addOperator(user, sender);
 				std::cout << GREEN << BOLD << user->getNickname() << " is an operator." << RESET << std::endl << std::endl;
 				return;
 			} else if (mode.substr(0, 2) == "-v") {
-				_channels[chan_index].delVoiced(user);
+				_channels[chan_index].delVoiced(user, sender);
 				std::cout << GREEN << BOLD << user->getNickname() << " is not voiced. " << RESET << std::endl << std::endl;
 				return;
 			} else if (mode.substr(0, 2) == "+v") {
-				_channels[chan_index].addVoiced(user);
+				_channels[chan_index].addVoiced(user, sender);
 				std::cout << GREEN << BOLD << user->getNickname() << " is voiced." << RESET << std::endl << std::endl;
 				return;
 			}

@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/09 15:18:37 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/09 15:59:07 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,12 +58,6 @@ bool    User::getChannelVerification() {
 bool    User::getPassOk() {
     return this->passOk;
 }
-// bool    User::getIsOperator() const {
-//     return this->_isOperator;
-// }
-// bool    User::getIsVoiced() const {
-//     return this->_isVoiced;
-// }
 
 pollfd  User::getPollFd() {
     return this->_client;
@@ -74,16 +68,6 @@ bool     User::getisInChannel() {
 std::string User::getWhatChannel() const {
     return this->whatChannel;
 }
-// std::string User::getMode() const {
-//     // Get the mode of the user with _isOperator and _isVoiced
-//     std::string mode = "";
-//     if (this->_isOperator)
-//         mode += "@";
-//     else if (this->_isVoiced)
-//         mode += "+";
-
-//     return mode;
-// }
 
 // Setters
 void    User::setNickname(std::string nickname) {
@@ -119,11 +103,3 @@ void    User::setPassOk(int ok) {
 void    User::setHostname(std::string hostname) {
     this->_hostname = hostname;
 }
-
-// void    User::setIsOperator(bool isOperator) {
-//     this->_isOperator = isOperator;
-// }
-
-// void    User::setIsVoiced(bool isVoiced) {
-//     this->_isVoiced = isVoiced;
-// }

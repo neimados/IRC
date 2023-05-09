@@ -24,7 +24,7 @@
 - ✅ KICK          (channel)
 - ✅ PRIVMSG       (message)
 - ✅ NOTICE        (message)
-- 🚧 MODE          (channel)
+- ✅ MODE          (channel)
 
 ✅ <!-- class Chanel  -->
 +o : accorder l'opérateur de chaîne à un utilisateur

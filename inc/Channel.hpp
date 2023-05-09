@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/09 15:17:15 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/09 16:36:22 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,10 @@ public:
     void setTopic(std::string topic);
     void updateUser(User *user);
 
-    void addOperator(User *user);
-    void addVoiced(User *user);
-    void delOperator(User *user);
-    void delVoiced(User *user);
+    void addOperator(User *user, User *sender);
+    void addVoiced(User *user, User *sender);
+    void delOperator(User *user, User *sender);
+    void delVoiced(User *user, User *sender);
 
     void setExternalMessage(bool externalMessage);
     void setIsModerated(bool isModerated);

@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/09 15:22:40 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/09 16:36:59 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,10 +93,10 @@ std::string Channel::getMode() const {
     std::string mode = "";
 
     // Add + before if there is one match
-    if (this->_externalMessage || this->_isModerated || this->_isPrivate || this->_isTopicSettable)
+    if (this->_externalMessage == false || this->_isModerated || this->_isPrivate || this->_isTopicSettable)
         mode += "+";
 
-    if (this->_externalMessage)
+    if (this->_externalMessage == false)
         mode += "n";
     if (this->_isModerated)
         mode += "m";
@@ -123,7 +123,11 @@ std::string Channel::getModeUser(User *user) const {
         mode += "+o";
     else if (this->isVoiced(user))
         mode += "+v";
-   mode += " ";
+
+    if (mode == " ")
+        mode = " - ";
+    else
+        mode += " ";
 
     return mode;
 }
@@ -160,89 +164,66 @@ void Channel::setIsTopicSettable(bool isTopicSettable) {
     this->_isTopicSettable = isTopicSettable;
 }
 
-void Channel::addOperator(User *user) {
+void Channel::addOperator(User *user, User *sender) {
     // Check if already operator
     if (this->isOperator(user))
         return ;
+        
     // Add the user to the vector of operators
     this->_ops.push_back(user->getFd());
-
-    // sendUserInChan(user, "MODE " + destinataire + " " + mode);
-
+    
     // Send the message to the user
-    std::string msg = ":IRC MODE " + this->_name + getModeUser(user) + user->getNickname() + "\r\n";
-    // send(user->getFd(), msg.c_str(), msg.size(), 0);
-
-    // Send message to all user in the channel
-    msg = ":" + user->getNickname() + " MODE " + this->_name + " +o " + user->getNickname() + "\r\n";  
+    std::string msg = ":" + sender->getNickname() + " MODE " + this->_name + " +o " + user->getNickname() + "\r\n";  
+    
     for (size_t i = 0; i < this->_usrs.size(); i++)
-    {
-        // if (this->_usrs[i].getFd() != user->getFd())
-            send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
-    }
+        send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
 }
 
-void Channel::addVoiced(User *user) {
+void Channel::addVoiced(User *user, User *sender) {
     // Check if already voiced
     if (this->isVoiced(user))
         return ;
+        
     // Add the user to the vector of voiced
     this->_voiced.push_back(user->getFd());
 
-    std::string msg = ":" + user->getNickname() + " MODE " + this->_name + getModeUser(user) + user->getNickname() + "\r\n";
-    // send(user->getFd(), msg.c_str(), msg.size(), 0);
-
-    // Send message to all user in the channel
-    msg = ":" + user->getNickname() + " MODE " + this->_name + " +v " + user->getNickname() + "\r\n";  
+    std::string msg = ":" + sender->getNickname() + " MODE " + this->_name + " +v " + user->getNickname() + "\r\n";  
+    
     for (size_t i = 0; i < this->_usrs.size(); i++)
-    {
-        // if (this->_usrs[i].getFd() != user->getFd())
-            send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
-    }
+        send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
 }
 
-void Channel::delOperator(User *user) {
+void Channel::delOperator(User *user, User *sender) {
     // Check if already operator
     if (!this->isOperator(user))
         return ;
+    
     // Remove the user from the vector of operators
     for (size_t i = 0; i < this->_ops.size(); i++) {
         if (this->_ops[i] == user->getFd())
             this->_ops.erase(this->_ops.begin() + i);
     }
 
-    std::string msg = ":IRC MODE " + this->_name + getModeUser(user) + user->getNickname() + "\r\n";
-    // send(user->getFd(), msg.c_str(), msg.size(), 0);
-
-    // Send message to all user in the channel
-    msg = ":" + user->getNickname() + " MODE " + this->_name + " -o " + user->getNickname() + "\r\n";  
+    std::string msg = ":" + sender->getNickname() + " MODE " + this->_name + " -o " + user->getNickname() + "\r\n";  
+    
     for (size_t i = 0; i < this->_usrs.size(); i++)
-    {
-        // if (this->_usrs[i].getFd() != user->getFd())
-            send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
-    }
+        send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
 }
 
-void Channel::delVoiced(User *user) {
+void Channel::delVoiced(User *user, User *sender) {
     // Check if already voiced
     if (!this->isVoiced(user))
         return ;
+        
     // Remove the user from the vector of voiced
     for (size_t i = 0; i < this->_voiced.size(); i++) {
         if (this->_voiced[i] == user->getFd())
             this->_voiced.erase(this->_voiced.begin() + i);
     }
 
-    std::string msg = ":IRC MODE " + this->_name + getModeUser(user) + user->getNickname() + "\r\n";
-    // send(user->getFd(), msg.c_str(), msg.size(), 0);
-
-    // Send message to all user in the channel
-    msg = ":" + user->getNickname() + " MODE " + this->_name + " -v " + user->getNickname() + "\r\n";  
+    std::string msg = ":" + sender->getNickname() + " MODE " + this->_name + " -v " + user->getNickname() + "\r\n";  
     for (size_t i = 0; i < this->_usrs.size(); i++)
-    {
-        // if (this->_usrs[i].getFd() != user->getFd())
-            send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
-    }
+        send(this->_usrs[i].getFd(), msg.c_str(), msg.size(), 0);
 }
 
 bool Channel::isOperator(User *user) const {
