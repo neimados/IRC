@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/09 16:36:59 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/11 21:36:47 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,12 +110,6 @@ std::string Channel::getMode() const {
 
 std::string Channel::getModeUser(User *user) const {
     std::string mode = " ";
-
-    // if (this->isOperator(user))
-    //     mode += "@";
-    // else if (this->isVoiced(user))
-    //     mode += "+";
-    // mode += " ";
 
     if (this->isOperator(user) && this->isVoiced(user))
         mode += "+ov";
