@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/09 15:59:07 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/11 21:45:24 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ User::User(pollfd Client, int fd, int socket) {
     this->isInChannel = false;
     this->_client = Client;
     this->passOk = false;
+    this->_cmdBuffer = "";
 }
 
 // Getters
@@ -38,6 +39,9 @@ std::string User::getPassword() const {
 }
 std::string User::getHostname() const {
     return this->_hostname;
+}
+std::string User::getBuffer() const {
+    return this->_cmdBuffer;
 }
 
 int     User::getFd() const {
@@ -102,4 +106,7 @@ void    User::setPassOk(int ok) {
 }
 void    User::setHostname(std::string hostname) {
     this->_hostname = hostname;
+}
+void    User::setBuffer(std::string cmd) {
+    this->_cmdBuffer = cmd;
 }

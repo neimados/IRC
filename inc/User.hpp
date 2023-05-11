@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/09 15:58:52 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/11 21:44:50 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ public:
     std::string getNickname() const;
     std::string getPassword() const;
     std::string getHostname() const;
+    std::string getBuffer() const;
 
     int     getFd() const;
     int     getSocket() const;
@@ -54,6 +55,7 @@ public:
     void    setWhatChannel(std::string channelName);
     void    setPassOk(int ok);
     void    setHostname(std::string hostname);
+    void    setBuffer(std::string cmd);
 
 private:
     pollfd      _client;
@@ -64,6 +66,7 @@ private:
     std::string _password;
     std::string _hostname;
     std::string _cmd;
+    std::string _cmdBuffer;
 
     bool        isVerified;
     bool        userIsVerified;

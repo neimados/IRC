@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/09 16:36:22 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/12 00:53:36 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,9 @@ public:
     std::string getModeUser(User *user) const;
 
     bool isOperator(User *user) const;
+    bool isOperator(User user) const;
     bool isVoiced(User *user) const;
+    bool isVoiced(User user) const;
     bool isInChannel(User *user) const;
     
     User * getChanUsr(int i);

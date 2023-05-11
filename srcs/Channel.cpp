@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/11 21:36:47 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/12 00:54:10 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,15 @@ std::string Channel::getChanUsrs() const {
 
     for (size_t i = 0; i < this->_usrs.size(); i++)
     {
+        if (this->isVoiced(this->_usrs[i]))
+            list += "+";
+        else if (this->isOperator(this->_usrs[i]))
+            list += "@";
+        else
+            list += " ";
+        
         list += this->_usrs[i].getNickname();
+        
         if (i < this->_usrs.size() - 1)
             list += " ";
     }
@@ -162,6 +170,10 @@ void Channel::addOperator(User *user, User *sender) {
     // Check if already operator
     if (this->isOperator(user))
         return ;
+
+    // Check if user is in the channel
+    if (!this->isInChannel(user))
+        return ;
         
     // Add the user to the vector of operators
     this->_ops.push_back(user->getFd());
@@ -176,6 +188,10 @@ void Channel::addOperator(User *user, User *sender) {
 void Channel::addVoiced(User *user, User *sender) {
     // Check if already voiced
     if (this->isVoiced(user))
+        return ;
+
+    // Check if user is in the channel
+    if (!this->isInChannel(user))
         return ;
         
     // Add the user to the vector of voiced
@@ -237,6 +253,25 @@ bool Channel::isVoiced(User *user) const {
     }
     return false;
 }
+
+bool Channel::isOperator(User user) const {
+    // Check if user's fd is in the vector of operators
+    for (size_t i = 0; i < this->_ops.size(); i++) {
+        if (this->_ops[i] == user.getFd())
+            return true;
+    }
+    return false;
+}
+
+bool Channel::isVoiced(User user) const {
+    // Check if user's fd is in the vector of voiced
+    for (size_t i = 0; i < this->_voiced.size(); i++) {
+        if (this->_voiced[i] == user.getFd())
+            return true;
+    }
+    return false;
+}
+
 
 bool Channel::isInChannel(User *user) const {
     // Check if user's fd is in the vector of users
