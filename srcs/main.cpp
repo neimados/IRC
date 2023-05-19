@@ -21,7 +21,7 @@ void    sigint_handler(int sig)
     std::cout << std::endl << ORANGE << BOLD;
     std::cout << "Stop listenning, close IRC.";
     std::cout << RESET << std::endl;
-    exit(0);
+    return;
 }
 
 // Function to catch ctrl + d
@@ -35,7 +35,7 @@ void    sigterm_handler(int sig)
     std::cout << std::endl << GREY << ITALIC;
     std::cout << "IRC terminal was cleared.";
     std::cout << RESET << std::endl;
-    exit(0);
+    return;
 }
 
 int main(int ac, char **av) {

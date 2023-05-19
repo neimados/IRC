@@ -15,7 +15,10 @@
 #include "../inc/User.hpp"
 
 Server::Server(int port, std::string password) {
-	_fds = new struct pollfd[10];
+	for (int i = 0; i < 10; i++){
+		_fds.push_back(pollfd());
+	}
+	// _fds = new struct pollfd[10];
 	_fdSrv = 0;
 	_nbUsers = 1;
 	_port = port;
@@ -28,7 +31,6 @@ Server::Server(int port, std::string password) {
 	
 	int							optval = 1;
 	struct addrinfo	hint, *serverinfo, *tmp;
-
 	memset(&hint, 0, sizeof(hint));
 
 	hint.ai_family		= AF_INET;
@@ -63,8 +65,7 @@ Server::Server(int port, std::string password) {
 	_fds[0].events = POLLIN;
 }
 
-Server::~Server(){
-	delete[] _fds;
+Server::~Server(){	
 	close(_fdSrv);
 }
 
@@ -89,7 +90,6 @@ void Server::startSrv() {
 
 	std::cout << GREEN << ITALIC << "Listening on port " << BOLD << _Port << RESET << std::endl;
 	std::cout << "Try `" << BOLD << "nc 127.0.0.1 " << _Port << "`" << RESET << std::endl << std::endl;
-	
 	// Boucle principale
 	while (1) {
 		// Print message
@@ -99,11 +99,9 @@ void Server::startSrv() {
 		std::cout << "\033[1A\033[2K";
 		std::cout << "\033[1A\033[2K";
 		
-		pollTest = poll(_fds, _nbUsers, -1);
-
+		pollTest = poll(&_fds[0], _nbUsers, -1);
 		if (pollTest == -1)
 			throw SrvError();
-
 		for (int i = 0; i < _nbUsers; i++) {
 			if (_fds[i].revents & POLLIN) {
 				if (_fds[i].fd == _fdSrv) {
@@ -123,8 +121,9 @@ void Server::startSrv() {
 						send(fd, msg.c_str(), msg.length(), 0);
 						close(fd);
 					}
-					else 
+					else {
 						addUser(); // Add user to the server
+					}
 				} else
 					parseCmd(i); // Parse the command of the user
 			}
@@ -154,26 +153,23 @@ void Server::addUser() {
 	_fds[_nbUsers].fd = fd;
 	_fds[_nbUsers].events = POLLIN;
 
-	User* user = new User(client, client.fd, fd);
+	User user = User(client, client.fd, fd);
 
 	std::string nickname = "User_";
 	ss << fd;
 	nickname += ss.str();
+	user.setNickname(nickname);
+	user.setUsername(nickname);
 
-	user->setNickname(nickname);
-	user->setUsername(nickname);
-
-	std::cout << std::endl << BLUE << BOLD << "New connection" << RESET << " of " << ITALIC << CYAN << user->getNickname() << RESET;
+	std::cout << std::endl << BLUE << BOLD << "New connection" << RESET << " of " << ITALIC << CYAN << user.getNickname() << RESET;
 	std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
 	std::cout << " on socket " << CYAN << BOLD << fd << RESET << " at " << this->getTime() << std::endl;
-
-	user->setVerification(true);
-	_usrs.push_back(*user);
+	user.setVerification(true);
+	_usrs.push_back(user);
 
 	// Update pollfd
 	_nbUsers++;
 
-	delete user;
 }
 
 void	Server::parseCmd(int fd){
@@ -245,7 +241,6 @@ void	Server::parseCmd(int fd){
 			execCmd(user, cmd, fd);
 		}
 	}
-	
 	memset(&buf, 0, MAX_BUFFER); // Reset du buffer
 }
 
@@ -513,17 +508,11 @@ int Server::getNumberUsers() const {
 
 
 std::string Server::getTime() const {
-	time_t rawtime;
-	struct tm * timeinfo;
-	char buffer[8];
-	
-	time (&rawtime);
-	timeinfo = localtime (&rawtime);
-	strftime (buffer,8,"%Hh%Mm%S",timeinfo);
-	
-	std::string str(buffer);
-	str.erase(str.size() - 1);
+	time_t now = time(0);
+	tm *gmt = gmtime(&now);
+	std::string str = asctime(gmt);
 	return str;
+
 }
 
 std::string Server::getPassword() const {

@@ -130,7 +130,7 @@ private:
 	Server(Server const &srv);
 	Server &operator= (Server const &srv);
 
-	struct pollfd			*_fds;
+	std::vector<pollfd>		_fds;
 	int								_fdSrv;
 	int								_port;
 	int								_nbUsers;
