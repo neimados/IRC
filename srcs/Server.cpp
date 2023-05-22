@@ -100,8 +100,11 @@ void Server::startSrv() {
 		std::cout << "\033[1A\033[2K";
 		
 		pollTest = poll(&_fds[0], _nbUsers, -1);
-		if (pollTest == -1)
-			throw SrvError();
+		if (pollTest == -1) {
+			// Closing Server
+			return;
+		}
+
 		for (int i = 0; i < _nbUsers; i++) {
 			if (_fds[i].revents & POLLIN) {
 				if (_fds[i].fd == _fdSrv) {
@@ -385,10 +388,10 @@ void Server::sendPrivMsgInChan(std::string chan, std::string msg, std::string us
 	}
 }
 
-void Server::sendToUserInChan(User *user, int code, std::string chan, std::string msg) {
+void Server::sendToUserInChan(User *user, std::string code, std::string chan, std::string msg) {
 	// Sending a message to a user while he is in a channel with a custom code
 	std::string start = ":IRC ";
-	start += std::to_string(code);
+	start += code;
 	start += " ";
 	start += user->getNickname();
 	start += " ";
@@ -890,7 +893,7 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 			&& _channels[chan_index].isVoiced(user) == false
 		) {
 			// Send the error message to the user
-			sendToUserInChan(user, 404, destinataire, "Channel is moderated.");
+			sendToUserInChan(user, "404", destinataire, "Channel is moderated.");
 			std::cout << RED << BOLD << "Channel " << destinataire << " is moderated." << RESET << std::endl << std::endl;
 			return;
 		}
@@ -904,7 +907,7 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 			if (_channels[chan_index].getExternalMessage() == false && _channels[chan_index].isInChannel(user) == false) {
 				// Send the error message to the user
 				if (user->getisInChannel() == false)
-					sendToUserInChan(user, 404, destinataire, "You're not in the channel " + destinataire + ".");
+					sendToUserInChan(user, "404", destinataire, "You're not in the channel " + destinataire + ".");
 				else
 					sendToUser(user, "Error: you're not in the channel " + destinataire + ".");
 				std::cout << RED << BOLD << "User " << user->getNickname() << " is not in the channel " << destinataire << " without external messages." << RESET << std::endl << std::endl;
@@ -1026,7 +1029,7 @@ void Server::cmdNames(User *user, std::string cmd) {
 			std::cout << RED << BOLD << "Channel doesn't exist." << RESET << std::endl << std::endl;
 		} else {
 			// List the users in the channel
-			sendToUserInChan(user, 353, channels[i], _channels[chan_index].getChanUsrs());
+			sendToUserInChan(user, "353", channels[i], _channels[chan_index].getChanUsrs());
 			std::cout << GREEN << BOLD << "List of users in " << channels[i] << ": " << _channels[chan_index].getChanUsrs() << RESET << std::endl << std::endl;
 		}
 	}
@@ -1065,7 +1068,7 @@ void Server::cmdTopic(User *user, std::string cmd) {
 	) {
 		// Send the error message to the user
 		if (user->getisInChannel())
-			sendToUserInChan(user, 404, user->getWhatChannel(), " you are not allowed to change the topic of " + channel + ".");
+			sendToUserInChan(user, "404", user->getWhatChannel(), " you are not allowed to change the topic of " + channel + ".");
 		else
 			sendToUser(user, "Error: you are not allowed to change the topic of " + channel + ".");
 		std::cout << RED << BOLD << "User " << user->getNickname() << " is not allowed to change the topic of " << channel << "." << RESET << std::endl << std::endl;
@@ -1076,10 +1079,10 @@ void Server::cmdTopic(User *user, std::string cmd) {
 	if (chan_index != -1 && topic.size() == 0) {
 		if (_channels[chan_index].getTopic().size() != 0) {
 			std::cout << GREEN << BOLD << "Topic of " << channel << ": " << _channels[chan_index].getTopic() << RESET << std::endl << std::endl;
-			sendToUserInChan(user, 332, channel, _channels[chan_index].getTopic());
+			sendToUserInChan(user, "332", channel, _channels[chan_index].getTopic());
 		} else {
 			std::cout << GREEN << BOLD << "Topic of " << channel << ": No topic set." << RESET << std::endl << std::endl;
-			sendToUserInChan(user, 331, channel, "No topic is set");
+			sendToUserInChan(user, "331", channel, "No topic is set");
 		}
 		return;
 	}
@@ -1207,7 +1210,7 @@ void Server::cmdKick(User *user, std::string cmd) {
 		if (user->getisInChannel() == false)
 			sendToUser(user, "Error: you are not in channel " + channel + ".");
 		else
-			sendToUserInChan(user, 404, user->getWhatChannel(), " you are not allowed to kick " + username + " from " + channel + ".");
+			sendToUserInChan(user, "404", user->getWhatChannel(), " you are not allowed to kick " + username + " from " + channel + ".");
 		
 		std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << channel << "." << RESET << std::endl << std::endl;
 		return;
@@ -1221,7 +1224,7 @@ void Server::cmdKick(User *user, std::string cmd) {
 		if (user->getisInChannel() == false)
 			sendToUser(user, "Error: channel " + channel + " doesn't exist.");
 		else
-			sendToUserInChan(user, 404, user->getWhatChannel(), " channel " + channel + " doesn't exist.");
+			sendToUserInChan(user, "404", user->getWhatChannel(), " channel " + channel + " doesn't exist.");
 
 		std::cout << RED << BOLD << "Channel doesn't exist." << RESET << std::endl << std::endl;
 		return;
@@ -1305,7 +1308,7 @@ void Server::cmdNotice(User *user, std::string cmd) {
 			&& _channels[chan_index].isVoiced(user) == false
 		) {
 			// Send the error message to the user
-			sendToUserInChan(user, 404, destinataire, "Channel is moderated.");
+			sendToUserInChan(user, "404", destinataire, "Channel is moderated.");
 			std::cout << RED << BOLD << "Channel " << destinataire << " is moderated." << RESET << std::endl << std::endl;
 			return;
 		}
@@ -1321,7 +1324,7 @@ void Server::cmdNotice(User *user, std::string cmd) {
 			if (_channels[chan_index].getExternalMessage() == false && _channels[chan_index].isInChannel(user) == false) {
 				// Send the error message to the user
 				if (user->getisInChannel() == false)
-					sendToUserInChan(user, 404, destinataire, "You're not in the channel " + destinataire + ".");
+					sendToUserInChan(user, "404", destinataire, "You're not in the channel " + destinataire + ".");
 				else
 					sendToUser(user, "Error: you're not in the channel " + destinataire + ".");
 				std::cout << RED << BOLD << "User " << user->getNickname() << " is not in the channel " << destinataire << " without external messages." << RESET << std::endl << std::endl;

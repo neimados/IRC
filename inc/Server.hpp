@@ -73,7 +73,7 @@ public:
 	void	sendUserInChan(User *user, std::string chan);
 	void	sendAllUsersInChan(std::string chan, std::string msg);
 	void	sendPrivMsgInChan(std::string chan, std::string msg, std::string user);
-	void	sendToUserInChan(User *user, int code, std::string chan, std::string msg);
+	void	sendToUserInChan(User *user, std::string code, std::string chan, std::string msg);
 	
 	
 	/* ===== UTILS ===== */
