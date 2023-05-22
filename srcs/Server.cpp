@@ -218,24 +218,6 @@ void	Server::parseCmd(int fd){
 			cmd = user->getBuffer();
 			
 			std::cout << YELLOW << ITALIC << "Buffer is now `" << cmd << "`." << RESET << NORMAL << std::endl;
-
-			// // Check if there is a space in the command
-			// if (cmd.find(" ") != std::string::npos) {
-			// 	// Get the command before the space and check if it is a valid command
-			// 	std::string cmdBeforeSpace = cmd.substr(0, cmd.find(" "));
-
-			// 	std::cout << "Searching for command `" << cmdBeforeSpace << "`..." << std::endl << std::endl;
-				
-			// 	if (cmdBeforeSpace == "PASS" || cmdBeforeSpace == "NICK" || cmdBeforeSpace == "USER" || cmdBeforeSpace == "CAP" || cmdBeforeSpace == "PING" || cmdBeforeSpace == "LIST" || cmdBeforeSpace == "QUIT" || cmdBeforeSpace == "JOIN" || cmdBeforeSpace == "NAMES" || cmdBeforeSpace == "PART" || cmdBeforeSpace == "TOPIC" || cmdBeforeSpace == "INVITE" || cmdBeforeSpace == "KICK" || cmdBeforeSpace == "PRIVMSG" || cmdBeforeSpace == "NOTICE" || cmdBeforeSpace == "MODE") {
-			// 		// Valid command
-			// 		execCmd(user, "", fd);
-			// 	} else {
-			// 		// Invalid command
-			// 		std::cout << RED << BOLD << "Command `" << cmdBeforeSpace << "` not found." << RESET << std::endl << std::endl;
-			// 		sendToUser(user, "Command not found in buffer mode.");
-			// 	}
-			// }
-		
 		} else if (cmd.find("\n") != std::string::npos) {
 			// Valid command
 			std::string delimiter = "\n";
@@ -269,16 +251,6 @@ void	Server::disconnectUser(User *user, int fd) {
 	// A loop to find the user in the vector and delete it
 	for (itUser = _usrs.begin(); itUser != _usrs.end(); itUser++) {
 		if (itUser->getFd() == user->getFd()) {
-			// // Quit the channel
-			// if (it->getisInChannel() == true && it->getWhatChannel().size() > 0) {
-			// 	int chan_index = findChan(it->getWhatChannel());
-
-			// 	if (chan_index != -1) {
-			// 		_channels[chan_index].delUsr(&(*it));
-			// 		sendAllUsersInChan(_channels[chan_index].getName(), user->getNickname() + " PART " + _channels[chan_index].getName());
-			// 	}
-			// }
-			
 			// Close the socket
 			_fds[fd].fd = _fds[_nbUsers - 1].fd;
 			close(user->getFd());
@@ -848,13 +820,6 @@ void Server::cmdJoin(User *user, std::string cmd) {
 
 		// Send the TOPIC message to the user
 		cmdTopic(user, channels[i]);
-
-		// Check if user is operator or voiced
-		// ! commented because ça bug
-		// if (_channels[chan_index].isOperator(user) == true)
-		// 	sendUserInChan(user, user->getNickname() + " MODE " +channels[i] + " +v " + user->getNickname());
-		// if (_channels[chan_index].isVoiced(user) == true)
-		// 	sendUserInChan(user, user->getNickname() + " MODE " +channels[i] + " +v " + user->getNickname());
 	}	
 
 	if (channels.size() == 0) {
