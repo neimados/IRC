@@ -200,10 +200,17 @@ void	Server::parseCmd(int fd){
 		std::string cmd(buf);
 
 		// Ignore if the command is empty
-		if (cmd.size() == 0 || cmd == "\n" || cmd == "\r" || cmd == "\r\n")
+		if (cmd.size() == 0)
 			return;
 
-		if ((cmd.size() == 1 || cmd.size() > 1) && cmd.substr(0, 5) != "PASS " && cmd[cmd.size() - 1] != '\n') {
+		if ( cmd == "\n" || cmd == "\r" || cmd == "\r\n") {
+			// Execute the command in the buffer
+			std::string cmdTmp = user->getBuffer();
+			user->setBuffer("");
+
+			std::cout << YELLOW << ITALIC << "Execute command `" << cmdTmp << "`." << RESET << NORMAL << std::endl;
+			execCmd(user, cmdTmp, fd);
+		} else if ((cmd.size() == 1 || cmd.size() > 1) && cmd.substr(0, 5) != "PASS " && cmd[cmd.size() - 1] != '\n') {
 			// Command with `ctrl + D`
 			std::cout << CYAN << ITALIC << "Added `" << cmd << "` to user's buffer (ctrl +D)." << RESET << NORMAL << std::endl;
 			
@@ -212,22 +219,22 @@ void	Server::parseCmd(int fd){
 			
 			std::cout << YELLOW << ITALIC << "Buffer is now `" << cmd << "`." << RESET << NORMAL << std::endl;
 
-			// Check if there is a space in the command
-			if (cmd.find(" ") != std::string::npos) {
-				// Get the command before the space and check if it is a valid command
-				std::string cmdBeforeSpace = cmd.substr(0, cmd.find(" "));
+			// // Check if there is a space in the command
+			// if (cmd.find(" ") != std::string::npos) {
+			// 	// Get the command before the space and check if it is a valid command
+			// 	std::string cmdBeforeSpace = cmd.substr(0, cmd.find(" "));
 
-				std::cout << "Searching for command `" << cmdBeforeSpace << "`..." << std::endl << std::endl;
+			// 	std::cout << "Searching for command `" << cmdBeforeSpace << "`..." << std::endl << std::endl;
 				
-				if (cmdBeforeSpace == "PASS" || cmdBeforeSpace == "NICK" || cmdBeforeSpace == "USER" || cmdBeforeSpace == "CAP" || cmdBeforeSpace == "PING" || cmdBeforeSpace == "LIST" || cmdBeforeSpace == "QUIT" || cmdBeforeSpace == "JOIN" || cmdBeforeSpace == "NAMES" || cmdBeforeSpace == "PART" || cmdBeforeSpace == "TOPIC" || cmdBeforeSpace == "INVITE" || cmdBeforeSpace == "KICK" || cmdBeforeSpace == "PRIVMSG" || cmdBeforeSpace == "NOTICE" || cmdBeforeSpace == "MODE") {
-					// Valid command
-					execCmd(user, "", fd);
-				} else {
-					// Invalid command
-					std::cout << RED << BOLD << "Command `" << cmdBeforeSpace << "` not found." << RESET << std::endl << std::endl;
-					sendToUser(user, "Command not found in buffer mode.");
-				}
-			}
+			// 	if (cmdBeforeSpace == "PASS" || cmdBeforeSpace == "NICK" || cmdBeforeSpace == "USER" || cmdBeforeSpace == "CAP" || cmdBeforeSpace == "PING" || cmdBeforeSpace == "LIST" || cmdBeforeSpace == "QUIT" || cmdBeforeSpace == "JOIN" || cmdBeforeSpace == "NAMES" || cmdBeforeSpace == "PART" || cmdBeforeSpace == "TOPIC" || cmdBeforeSpace == "INVITE" || cmdBeforeSpace == "KICK" || cmdBeforeSpace == "PRIVMSG" || cmdBeforeSpace == "NOTICE" || cmdBeforeSpace == "MODE") {
+			// 		// Valid command
+			// 		execCmd(user, "", fd);
+			// 	} else {
+			// 		// Invalid command
+			// 		std::cout << RED << BOLD << "Command `" << cmdBeforeSpace << "` not found." << RESET << std::endl << std::endl;
+			// 		sendToUser(user, "Command not found in buffer mode.");
+			// 	}
+			// }
 		
 		} else if (cmd.find("\n") != std::string::npos) {
 			// Valid command
@@ -290,10 +297,13 @@ void	Server::disconnectUser(User *user, int fd) {
 }
 
 void Server::execCmd(User *user, std::string cmd, int fd) {
-	// Concat command with buffer (ctrl + D) and reset it
-	cmd = user->getBuffer() + cmd;
-	user->setBuffer("");
-	
+	// Check is user's buffr is empty
+	if (user->getBuffer().size() > 0) {
+		// Append the command to the buffer
+		cmd = user->getBuffer() + cmd;
+		user->setBuffer("");
+	}
+
 	std::cout << BOLD << user->getNickname() << ": " << RESET << cmd <<std::endl;
 
 	if (user->getPassOk() == false && cmd.substr(0, 4) != "PASS") {
