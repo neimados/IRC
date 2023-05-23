@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/12 00:48:28 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/23 18:54:45 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@ Server::Server(int port, std::string password) {
 	for (int i = 0; i < 10; i++){
 		_fds.push_back(pollfd());
 	}
+
+	SERVER_NAME = "ft_irc";
+
 	// _fds = new struct pollfd[10];
 	_fdSrv = 0;
 	_nbUsers = 1;
@@ -158,7 +161,7 @@ void Server::addUser() {
 
 	User user = User(client, client.fd, fd);
 
-	std::string nickname = "User_";
+	std::string nickname = "user";
 	ss << fd;
 	nickname += ss.str();
 	user.setNickname(nickname);
@@ -166,8 +169,7 @@ void Server::addUser() {
 
 	std::cout << std::endl << BLUE << BOLD << "New connection" << RESET << " of " << ITALIC << CYAN << user.getNickname() << RESET;
 	std::cout << " from " << UNDERLINE << inet_ntop(AF_INET, &(s->sin_addr), ip_str, INET_ADDRSTRLEN) << RESET;
-	std::cout << " on socket " << CYAN << BOLD << fd << RESET << " at " << this->getTime() << std::endl;
-	user.setVerification(true);
+	std::cout << " on socket " << CYAN << BOLD << fd << RESET << "." << std::endl;
 	_usrs.push_back(user);
 
 	// Update pollfd
@@ -210,32 +212,20 @@ void	Server::parseCmd(int fd){
 
 			std::cout << YELLOW << ITALIC << "Execute command `" << cmdTmp << "`." << RESET << NORMAL << std::endl;
 			execCmd(user, cmdTmp, fd);
-		} else if ((cmd.size() == 1 || cmd.size() > 1) && cmd.substr(0, 5) != "PASS " && cmd[cmd.size() - 1] != '\n') {
+		} else if (cmd.find("\n") == std::string::npos && cmd.find("\r") == std::string::npos) {
+			// Check if last char is a printable char
+			if (!isprint(cmd[cmd.size() - 2])) {
+				// Remove the last char
+				cmd.erase(cmd.size() - 2);
+			}
+
 			// Command with `ctrl + D`
 			std::cout << CYAN << ITALIC << "Added `" << cmd << "` to user's buffer (ctrl +D)." << RESET << NORMAL << std::endl;
 			
 			user->setBuffer(user->getBuffer() + cmd);
 			cmd = user->getBuffer();
 			
-			std::cout << YELLOW << ITALIC << "Buffer is now `" << cmd << "`." << RESET << NORMAL << std::endl;
-
-			// // Check if there is a space in the command
-			// if (cmd.find(" ") != std::string::npos) {
-			// 	// Get the command before the space and check if it is a valid command
-			// 	std::string cmdBeforeSpace = cmd.substr(0, cmd.find(" "));
-
-			// 	std::cout << "Searching for command `" << cmdBeforeSpace << "`..." << std::endl << std::endl;
-				
-			// 	if (cmdBeforeSpace == "PASS" || cmdBeforeSpace == "NICK" || cmdBeforeSpace == "USER" || cmdBeforeSpace == "CAP" || cmdBeforeSpace == "PING" || cmdBeforeSpace == "LIST" || cmdBeforeSpace == "QUIT" || cmdBeforeSpace == "JOIN" || cmdBeforeSpace == "NAMES" || cmdBeforeSpace == "PART" || cmdBeforeSpace == "TOPIC" || cmdBeforeSpace == "INVITE" || cmdBeforeSpace == "KICK" || cmdBeforeSpace == "PRIVMSG" || cmdBeforeSpace == "NOTICE" || cmdBeforeSpace == "MODE") {
-			// 		// Valid command
-			// 		execCmd(user, "", fd);
-			// 	} else {
-			// 		// Invalid command
-			// 		std::cout << RED << BOLD << "Command `" << cmdBeforeSpace << "` not found." << RESET << std::endl << std::endl;
-			// 		sendToUser(user, "Command not found in buffer mode.");
-			// 	}
-			// }
-		
+			std::cout << YELLOW << ITALIC << "Buffer is now `" << cmd << "`." << RESET << NORMAL << std::endl;		
 		} else if (cmd.find("\n") != std::string::npos) {
 			// Valid command
 			std::string delimiter = "\n";
@@ -257,28 +247,14 @@ void	Server::parseCmd(int fd){
 void	Server::disconnectUser(User *user, int fd) {
 	std::vector<User>::iterator itUser;
 	
-	//pour quitter tous les channels
-	std::vector<Channel>::iterator itChan = _channels.begin();
-	while (itChan != _channels.end()){
-		if (itChan->delUsr(user))
-			sendAllUsersInChan(itChan->getName(), user->getNickname() + " PART " + itChan->getName());
-		++itChan;
-	}
+	// Leave channel
+	if (user->getWhatChannel().size() > 0)
+		cmdPart(user, "PART " + user->getWhatChannel());
 
 	
 	// A loop to find the user in the vector and delete it
 	for (itUser = _usrs.begin(); itUser != _usrs.end(); itUser++) {
 		if (itUser->getFd() == user->getFd()) {
-			// // Quit the channel
-			// if (it->getisInChannel() == true && it->getWhatChannel().size() > 0) {
-			// 	int chan_index = findChan(it->getWhatChannel());
-
-			// 	if (chan_index != -1) {
-			// 		_channels[chan_index].delUsr(&(*it));
-			// 		sendAllUsersInChan(_channels[chan_index].getName(), user->getNickname() + " PART " + _channels[chan_index].getName());
-			// 	}
-			// }
-			
 			// Close the socket
 			_fds[fd].fd = _fds[_nbUsers - 1].fd;
 			close(user->getFd());
@@ -293,7 +269,7 @@ void	Server::disconnectUser(User *user, int fd) {
 	
 	// Display the disconnection
 	std::cout << std::endl << YELLOW << "Client " << BOLD << user->getNickname() << NORMAL;
-	std::cout << " on socket " << ITALIC << user->getSocket() << RESET << YELLOW << " disconnected at " << this->getTime() << RESET << std::endl;
+	std::cout << " on socket " << ITALIC << user->getSocket() << RESET << YELLOW << " disconnected." << RESET << std::endl;
 }
 
 void Server::execCmd(User *user, std::string cmd, int fd) {
@@ -306,22 +282,27 @@ void Server::execCmd(User *user, std::string cmd, int fd) {
 
 	std::cout << BOLD << user->getNickname() << ": " << RESET << cmd <<std::endl;
 
+	// Check if the user is logged in
 	if (user->getPassOk() == false && cmd.substr(0, 4) != "PASS") {
-		sendToUser(user, "User not connected yet. Please use PASS command first.");
-		std::cout << RED << BOLD << "User " << user->getNickname() << " not connected yet ; PASS command not used." << RESET << std::endl;
-		disconnectUser(user, fd);
+		user->sendToUser(ERR_NOLOGIN(user->getNickname()));
+		return;
+	}
+
+	// Check is the user is registered
+	if (user->getIsRegistered() == false && cmd.substr(0, 4) != "NICK" && cmd.substr(0, 4) != "USER" && cmd.substr(0, 3) != "CAP" && cmd.substr(0, 4) != "PASS") {
+		user->sendToUser(ERR_NOTREGISTERED(user->getNickname()));
 		return;
 	}
 	
 	if (cmd.substr(0, 4) == "PASS") {
 		//check password. If ok getPassOk() = true
-		this->cmdPass(user, cmd, fd);
+		this->cmdPass(user, cmd);
 	} else if (cmd.substr(0, 4) == "NICK") {
 		this->cmdNick(user, cmd);
 	} else if (cmd.substr(0, 4) == "USER") {
 		this->cmdUser(user, cmd);
 	} else if (cmd.substr(0, 3) == "CAP") {
-		this->cmdCap(user, cmd);
+		std::cout << "Command CAP received from " << BOLD << user->getNickname() << RESET << std::endl;
 	} else if (cmd.substr(0, 4) == "PING") {
 		this->cmdPing(user, cmd);
 	} else if (cmd.substr(0, 4) == "LIST") {
@@ -460,24 +441,35 @@ int Server::findUser(std::string const name) const {
 	return -1;
 }
 
-
-void Server::displayWelcome(User *user) {
-	sendToUser(user, " _       __     __                             ______         ________  ______");
-	sendToUser(user, "| |     / /__  / /________  ____ ___  ___     /_  __/___     /  _/ __ \\/ ____/");
-	sendToUser(user, "| | /| / / _ \\/ / ___/ __ \\/ __ `__ \\/ _ \\     / / / __ \\    / // /_/ / /     ");
-	sendToUser(user, "| |/ |/ /  __/ / /__/ /_/ / / / / / /  __/    / / / /_/ /  _/ // _, _/ /___   ");
-	sendToUser(user, "|__/|__/\\___/_/\\___/\\____/_/ /_/ /_/\\___/    /_/  \\____/  /___/_/ |_|\\____/   ");
-
-	sendToUser(user, "");
-	sendToUser(user, "    _                                                  _                            _     _    ");
-	sendToUser(user, "  __| | ___ ___      __ _  _  _  _  _  __ _  _ _     __| |__ __ ___  _ _  __ _  ___ | |__ | |__ ");
-	sendToUser(user, " / _` |(_-</ _ \\ _  / _` || || || || |/ _` || '_|_  / _` |\\ V // -_)| '_|/ _` |/ _ \\| '_ \\| '_ \\");
-	sendToUser(user, " \\__,_|/__/\\___/( ) \\__, | \\_,_| \\_, |\\__,_||_| ( ) \\__,_| \\_/ \\___||_|  \\__, |\\___/|_.__/|_.__/");
-	sendToUser(user, "                |/  |___/        |__/           |/                       |___/                  ");
-
-	sendToUser(user, "");
-	sendToUser(user, "");
+Channel* Server::getChannel(std::string const name) {
+	if (name[0] != '#')
+		return nullptr;
+	
+	// Search and return a channel by its name
+	for (size_t i = 0; i < _channels.size(); i++) {
+		if (_channels[i].getName() == name)
+			return &_channels[i];
+	}
+	return nullptr;
 }
+
+// void Server::displayWelcome(User *user) {
+// 	sendToUser(user, " _       __     __                             ______         ________  ______");
+// 	sendToUser(user, "| |     / /__  / /________  ____ ___  ___     /_  __/___     /  _/ __ \\/ ____/");
+// 	sendToUser(user, "| | /| / / _ \\/ / ___/ __ \\/ __ `__ \\/ _ \\     / / / __ \\    / // /_/ / /     ");
+// 	sendToUser(user, "| |/ |/ /  __/ / /__/ /_/ / / / / / /  __/    / / / /_/ /  _/ // _, _/ /___   ");
+// 	sendToUser(user, "|__/|__/\\___/_/\\___/\\____/_/ /_/ /_/\\___/    /_/  \\____/  /___/_/ |_|\\____/   ");
+
+// 	sendToUser(user, "");
+// 	sendToUser(user, "    _                                                  _                            _     _    ");
+// 	sendToUser(user, "  __| | ___ ___      __ _  _  _  _  _  __ _  _ _     __| |__ __ ___  _ _  __ _  ___ | |__ | |__ ");
+// 	sendToUser(user, " / _` |(_-</ _ \\ _  / _` || || || || |/ _` || '_|_  / _` |\\ V // -_)| '_|/ _` |/ _ \\| '_ \\| '_ \\");
+// 	sendToUser(user, " \\__,_|/__/\\___/( ) \\__, | \\_,_| \\_, |\\__,_||_| ( ) \\__,_| \\_/ \\___||_|  \\__, |\\___/|_.__/|_.__/");
+// 	sendToUser(user, "                |/  |___/        |__/           |/                       |___/                  ");
+
+// 	sendToUser(user, "");
+// 	sendToUser(user, "");
+// }
 
 void Server::displayWrongPass(User *user) {
 	sendToUser(user, "");
@@ -519,31 +511,12 @@ int Server::getNumberUsers() const {
 	return _usrs.size();
 }
 
-
-std::string Server::getTime() const {
-	time_t now = time(0);
-	tm *gmt = gmtime(&now);
-	std::string str = asctime(gmt);
-	return str;
-
-}
-
 std::string Server::getPassword() const {
 	return (this->_password);
 }
 
 
 /* ===== COMMANDS ===== */
-
-void Server::cmdQuit(User *user, std::string cmd, int fd) {
-	std::string msg = "";
-	
-	if (cmd.size() > 6)
-		msg = cmd.substr(6);
-	
-	std::cout << "Command QUIT received from " << BOLD << user->getNickname() << RESET << " with message: " << ITALIC << msg << RESET << std::endl;
-	disconnectUser(user, fd);
-}
 
 void Server::cmdPing(User *user, std::string cmd) {
 	std::string address = "";
@@ -552,315 +525,6 @@ void Server::cmdPing(User *user, std::string cmd) {
 		
 	std::cout << CYAN << "Sending PONG to address : " << ORANGE << BOLD << address << RESET << NORMAL << std::endl;
 	sendToUser(user, "PONG");
-}
-
-void Server::cmdCap(User *user, std::string cmd) {
-	(void) cmd;
-
-	std::cout << "Command CAP received from " << BOLD << user->getNickname() << RESET << std::endl;
-}
-
-void Server::cmdNick(User *user, std::string cmd) {
-	int	tmpNick = 0;
-
-	for (size_t i = 0; i < cmd.size(); i++) {
-		if (cmd[i] == ' ') {
-			cmd.erase(i, 1);
-			i--;
-		}
-		else
-			break;
-	}
-
-	for (int i = cmd.size() - 1; i >= 0; i--) {
-		if (cmd[i] == ' ') {
-			cmd.erase(i, 1);
-			i--;
-		}
-		else
-			break;
-	}
-
-	if (cmd.size() <= 4) {
-		std::cout << RED << BOLD << "<nickname> not found." << RESET << std::endl << std::endl;
-		sendToUser(user, "Error: <nickname> not found.");
-		return;
-	}
-	
-	std::string new_nickname = cmd.substr(5, cmd.size() - 5);
-
-	// Remove spaces from new_nickname
-	for (size_t i = 0; i < new_nickname.size(); i++) {
-		if (new_nickname[i] == ' ' || new_nickname[i] == '\t' || new_nickname[i] == '\n' || new_nickname[i] == '\r') {
-			new_nickname.erase(i, 1);
-			i--;
-		}
-	}
-
-	if (new_nickname == user->getNickname()) {
-		std::cout << ORANGE << ITALIC << user->getNickname() << RESET << " is still " << CYAN << BOLD << new_nickname << RESET << std::endl << std::endl;
-		return;
-	}
-
-	if (new_nickname.size() == 0) {
-		std::cout << RED << BOLD << "Nickname is not valid." << RESET << std::endl << std::endl;
-		sendToUser(user, "Error: <nickname> must contain only letters, numbers and underscores.");
-		new_nickname.clear();
-		return;
-	}
-
-	// Check if nickname contains only letters, numbers and underscores
-	for (size_t i = 0; i < new_nickname.size(); i++) {
-		if (!isalnum(new_nickname[i]) && new_nickname[i] != '_') {
-			std::cout << RED << BOLD << "Nickname contains invalid characters : '" << new_nickname[i] << "'" << RESET << std::endl << std::endl;
-			sendToUser(user, "Error: <nickname> must contain only letters, numbers and underscores.");
-			new_nickname.clear();
-			return;
-		}
-	}
-
-	if (new_nickname.size() == 0) {
-		std::cout << RED << BOLD << "Nickname too short!" << RESET << std::endl << std::endl;
-		sendToUser(user, "Error: <nickname> too short.");
-	} else if (new_nickname.size() > 9) {
-		std::cout << RED << BOLD << "Nickname too long!" << RESET << std::endl << std::endl;
-		sendToUser(user, "Error: <nickname> too long.");
-	}
-	else {
-		// Check if nickname is already taken
-		std::vector<User>::iterator it = _usrs.begin();
-		
-		while (it != _usrs.end()) {
-			if (it->getNickname() == new_nickname) {
-				std::cout << RED << BOLD << "Nickname already taken." << RESET << std::endl << std::endl;
-				sendToUser(user, "Error: Nickname already taken.");
-				
-				while (findUser(new_nickname) != -1){
-					std::stringstream ss;
-					ss << tmpNick;
-					new_nickname += ss.str();
-					tmpNick++;
-				}
-				
-				sendToUser(user, "New nickname :" + new_nickname);
-				continue;
-			}
-			it++;
-		}
-
-		std::cout << ORANGE << ITALIC << user->getNickname() << RESET << " is now " << CYAN << BOLD << new_nickname << RESET << std::endl << std::endl;
-
-		// Send NICK message to all users in the channel
-		sendAllIfInChannel(user, user->getNickname() + " NICK " + new_nickname);
-		
-		user->setNickname(new_nickname);
-		user->setUsername(new_nickname);
-
-		if (user->getisInChannel()) {
-			int chan_index = findChan(user->getWhatChannel());
-
-			if (chan_index != -1) {
-				_channels[chan_index].updateUser(user);
-			}
-		}
-
-		// Avert user
-		sendToUser(user, "Nickname updated.");
-	}
-			
-}
-
-void Server::cmdPass(User *user, std::string cmd, int fd) {
-	std::vector<User>::iterator it;
-	(void) it;
-	for (size_t i = 0; i < cmd.size(); i++) {
-		if (cmd[i] == ' ') {
-			cmd.erase(i, 1);
-			i--;
-		}
-		else
-			break;
-	}
-	for (int i = cmd.size() - 1; i >= 0; i--) {
-		if (cmd[i] == ' ') {
-			cmd.erase(i, 1);
-			i--;
-		}
-		else
-			break;
-	}
-	if (cmd.size() <= 4) {
-		std::cout << RED << BOLD << "Missing password." << std::endl;
-		return;
-	}
-	std::string pass = cmd.substr(5, cmd.size() - 5);
-	for (size_t i = 0; i < pass.size(); i++) {
-		if (pass[i] == ' ' || pass[i] == '\t' || pass[i] == '\n' || pass[i] == '\r') {
-			pass.erase(i, 1);
-			i--;
-		}
-	}
-	
-	user->setPassword(pass);
-	
-	if (pass == this->getPassword()) {
-		user->setPassOk(true);
-		displayWelcome(user);
-		
-		std::cout << GREEN << BOLD << "User " << user->getNickname() << " connected." << RESET << std::endl;
-	} else {
-		sendToUser(user, "Wrong password.");
-		displayWrongPass(user);
-		disconnectUser(user, fd);
-
-		std::cout << RED << BOLD << "Wrong password ; kick user from the server." << RESET << std::endl;
-	}
-}
-
-void Server::cmdUser(User *user, std::string cmd) {
-	// Split the message into its components
-	std::istringstream iss(cmd);
-	std::vector<std::string> components;
-	std::string component;
-
-	while (std::getline(iss, component, ' ')) {
-		components.push_back(component);
-	}
-
-	// Check if the message is a USER message
-	if (components.size() == 5 && components[0] == "USER") {
-		// Extract the relevant information from the message
-		std::string username = components[1];
-		std::string hostname = components[2];
-		std::string realname = components[4].substr(1);
-
-		std::string tmp = user->getNickname();
-
-		if (tmp.compare(username) != 0) {
-			sendAllIfInChannel(user, user->getNickname() + " NICK " + username);
-		}
-
-		username = user->getNickname();
-		realname = user->getNickname();
-		// Update the user's information
-		user->setNickname(username);
-		user->setHostname(hostname);
-		user->setUsername(username);
-
-		if (user->getisInChannel()) {
-			int chan_index = findChan(user->getWhatChannel());
-
-			if (chan_index != -1) {
-				_channels[chan_index].updateUser(user);
-			}
-		}
-
-		std::cout << CYAN << ITALIC << "Username: " << username << RESET << NORMAL << std::endl;
-		std::cout << CYAN << ITALIC << "Hostname: " << hostname << RESET << NORMAL << std::endl;
-		std::cout << CYAN << ITALIC << "Realname: " << realname << RESET << NORMAL << std::endl << std::endl;
-		
-		sendToUser(user, "User informations updated : username=`" + username + "` hostname=`" + hostname + "` realname=`" + realname + "`");
-	} else {
-		std::cout << RED << BOLD << "Invalid USER message." << RESET << std::endl << std::endl;
-		sendToUser(user, "Invalid USER message.");
-	}
-}
-
-void Server::cmdList(User *user, std::string cmd) {
-	(void)cmd;
-
-	std::cout << CYAN << ITALIC << "Showing users and channels." << RESET << std::endl << std::endl;
-
-	// Send the 321 message
-	sendUserInChan(user, "IRC 321 " + user->getNickname() + " Channel :Users  Name");
-	
-	// Send the 322 message for each channel
-	for (size_t i = 0; i < _channels.size(); i++) {
-		if (_channels[i].getIsPrivate() == false) {	
-			std::string msg = "IRC 322 " + user->getNickname() + " " + _channels[i].getName() + " " + _channels[i].getNbUsers() + " :" + _channels[i].getTopic();
-			sendUserInChan(user, msg);
-		}
-	}
-
-	// Send the 323 message
-	sendUserInChan(user, "IRC 323 " + user->getNickname() + " :End of /LIST");
-}
-
-void Server::cmdJoin(User *user, std::string cmd) {
-	// Clear command
-	cmd.erase(0, 5);
-	
-	std::cout << CYAN << "Command JOIN received from " << BOLD << user->getNickname() << RESET << " with channel(s): " << ITALIC << cmd << RESET << std::endl;
-
-	// Parse the command to get the channel name(s)
-	std::vector<std::string> channels;
-	std::string::size_type channel_start = cmd.find_first_of("#");
-	
-	while (channel_start != std::string::npos) {
-		// Set channel_end to the first space or , after channel_start
-		std::string::size_type channel_end = cmd.find_first_of(" ,", channel_start);
-		
-		if (channel_end == std::string::npos)
-			channel_end = cmd.size();
-			
-		std::string channel = cmd.substr(channel_start, channel_end - channel_start);
-		
-		channels.push_back(channel);
-		channel_start = cmd.find_first_of("#", channel_end);
-	}
-
-	// Join the channel(s)
-	for (size_t i = 0; i < channels.size(); i++) {
-		channels[i] = clearString(channels[i]);
-	
-		// Check if the channel already exists
-		int chan_index = findChan(channels[i]);
-		
-		if (chan_index == -1) {
-			// Create the channel
-			Channel chan(channels[i]);
-			_channels.push_back(chan);
-			chan_index = _channels.size() - 1;
-
-			std::cout << "Channel " << channels[i] << " created." << std::endl;
-		}
-
-		// If the user is already in the channel, delete him
-		if (user->getisInChannel() == true && user->getWhatChannel().size() > 0) {
-			int chan_index = findChan(user->getWhatChannel());
-
-			if (chan_index != -1) {
-				_channels[chan_index].delUsr(user);
-				sendAllUsersInChan(_channels[chan_index].getName(), user->getNickname() + " PART " + _channels[chan_index].getName());
-			}
-		}
-		
-		// Add the user to the channel
-		_channels[chan_index].addUsr(user);
-		user->setWhatChannel(_channels[chan_index].getName());
-		user->setisInChannel(true);
-
-		// Send the JOIN message to the channel
-		sendAllUsersInChan(channels[i], user->getNickname() + " JOIN " + channels[i]);
-
-		// Send the NAMES message to the user
-		cmdNames(user, channels[i]);
-
-		// Send the TOPIC message to the user
-		cmdTopic(user, channels[i]);
-
-		// Check if user is operator or voiced
-		// ! commented because ça bug
-		// if (_channels[chan_index].isOperator(user) == true)
-		// 	sendUserInChan(user, user->getNickname() + " MODE " +channels[i] + " +v " + user->getNickname());
-		// if (_channels[chan_index].isVoiced(user) == true)
-		// 	sendUserInChan(user, user->getNickname() + " MODE " +channels[i] + " +v " + user->getNickname());
-	}	
-
-	if (channels.size() == 0) {
-		std::cout << RED << BOLD << "No channel specified or wrong usage." << RESET << std::endl << std::endl;
-		sendToUser(user, "Error: No channel specified or wrong usage.");
-	}
 }
 
 void Server::cmdPrivmsg(User *user, std::string cmd) {
@@ -940,61 +604,6 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 			// Send the message to the user
 			sendToUser(&(_usrs[user_index]), user->getNickname() + " PRIVMSG " + destinataire + " :" + msg);
 			std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataire << RESET << std::endl << std::endl;
-		}
-	}
-}
-
-void Server::cmdPart(User *user, std::string cmd) {
-	// Clear command
-	cmd.erase(0, 5);
-	
-	std::cout << CYAN << "Command PART received from " << BOLD << user->getNickname() << RESET << " with channel(s): " << ITALIC << cmd << RESET << std::endl;
-	
-	// Parse the command to get the channel name(s)
-	std::vector<std::string> channels;
-	std::string::size_type channel_start = cmd.find_first_of("#");
-	
-	while (channel_start != std::string::npos) {
-		// Set channel_end to the first ' ' or ',' after channel_start
-		std::string::size_type channel_end = cmd.find_first_of(" ,", channel_start);
-		
-		if (channel_end == std::string::npos)
-			channel_end = cmd.size();
-			
-		std::string channel = cmd.substr(channel_start, channel_end - channel_start);
-		channels.push_back(channel);
-		channel_start = cmd.find_first_of("#", channel_end);
-	}
-
-	// Part the channel(s)
-	for (size_t i = 0; i < channels.size(); i++) {
-		// Check if the channel exists with a loop
-		int chan_index = findChan(channels[i]);
-		
-		if (chan_index == -1) {
-			// Send the error message to the user
-			sendToUser(user, "Error: channel " + channels[i] + " doesn't exist.");
-
-			std::cout << RED << BOLD << "Channel " << channels[i] << " doesn't exist." << RESET << std::endl << std::endl;
-		} else {
-			// Remove the user from the channel
-			_channels[chan_index].delUsr(user);
-			
-			// Remove privileges
-			_channels[chan_index].delOperator(user, user);
-			_channels[chan_index].delVoiced(user, user);
-			
-			user->setWhatChannel("");
-			user->setisInChannel(false);
-			
-			// Send the PART message to the user
-			sendUserInChan(user, user->getNickname() + " PART " + channels[i]);
-			sendAllUsersInChan(channels[i], user->getNickname() + " PART " + channels[i]);
-			
-			// Send the NAMES message to the user
-			cmdNames(user, channels[i]);
-
-			std::cout << GREEN << BOLD << user->getNickname() << " left " << channels[i] << RESET << std::endl << std::endl;
 		}
 	}
 }

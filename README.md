@@ -13,18 +13,18 @@
 - ✅ NICK
 - ✅ PASS
 - ✅ USER
-- ✅ PING
+- 🚧 PING
 - ✅ QUIT
 - ✅ LIST          (channel)
 - ✅ JOIN          (channel)
 - ✅ PART          (channel)
-- ✅ NAMES         (channel)
-- ✅ TOPIC         (channel)
-- ✅ INVITE        (channel)
-- ✅ KICK          (channel)
-- ✅ PRIVMSG       (message)
-- ✅ NOTICE        (message)
-- ✅ MODE          (channel)
+- 🚧 NAMES         (channel)
+- 🚧 TOPIC         (channel)
+- 🚧 INVITE        (channel)
+- 🚧 KICK          (channel)
+- 🚧 PRIVMSG       (message)
+- 🚧 NOTICE        (message)
+- 🚧 MODE          (channel)
 
 ✅ <!-- class Chanel  -->
 +o : accorder l'opérateur de chaîne à un utilisateur
@@ -49,3 +49,16 @@
 ✅ <!-- TOPIC cmd -->
 +t : mode limiter les sujets (seuls les opérateurs de chaîne peuvent changer le sujet)
 -t : supprimer le mode limiter les sujets
+
+
+
+## À corriger
+
+Codes d'envoi de messages
+Réponses et messages d'erreur
+Message du QUIT
+Mode -i pour INVITE
+PASS, NICK puis USER
+User : get and update nickname
+Notice et Privmsg : gérer les multiples destinataires
+PASS avec ctrl + D

@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/11 21:45:24 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/23 11:31:51 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,34 @@ User::~User() {}
 User::User(pollfd Client, int fd, int socket) {
     this->_fd = fd;
     this->_socket = socket;
+    this->isRegistered = false;
     this->isVerified = false;
     this->userIsVerified = false;
     this->isInChannel = false;
     this->_client = Client;
     this->passOk = false;
     this->_cmdBuffer = "";
+}
+
+void    User::sendToUser(std::string message) {
+	message.append("\r\n");
+    
+	int		n;
+	size_t	total = 0;
+	size_t	nbytes = message.length();
+
+	while (total < nbytes) {
+		n = send(this->_fd, &(message[total]), nbytes - total, 0);
+
+        // Check for errors
+		if (n == -1) break;
+
+        // Update total
+		total += n;
+	}
+
+	if (n == -1)
+		std::cerr << RED << "Error User::sendToUser" << RESET << std::endl;
 }
 
 // Getters
@@ -61,6 +83,9 @@ bool    User::getChannelVerification() {
 }
 bool    User::getPassOk() {
     return this->passOk;
+}
+bool   User::getIsRegistered() {
+    return this->isRegistered;
 }
 
 pollfd  User::getPollFd() {
@@ -109,4 +134,7 @@ void    User::setHostname(std::string hostname) {
 }
 void    User::setBuffer(std::string cmd) {
     this->_cmdBuffer = cmd;
+}
+void    User::setIsRegistered(bool type) {
+    this->isRegistered = type;
 }

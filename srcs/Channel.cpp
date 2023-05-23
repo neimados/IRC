@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/12 00:54:10 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/23 16:33:22 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,31 @@ Channel::~Channel() {}
 
 std::string Channel::getName() const {
     return this->_name;
+}
+
+std::vector<User> Channel::getUsers() {
+    return this->_usrs;
+}
+
+void Channel::sendToChannel(std::string msg, User *sender) {
+    // Parcours du vecteur de User
+    for (size_t i = 0; i < this->_usrs.size(); i++)
+    {
+        if (this->_usrs[i].getFd() != sender->getFd())
+        {
+            // Send the message to the channel
+            this->_usrs[i].sendToUser(msg);
+        }
+    }
+}
+
+void Channel::sendToChannel(std::string msg) {
+    // Parcours du vecteur de User
+    for (size_t i = 0; i < this->_usrs.size(); i++)
+    {
+        // Send the message to the channel
+        this->_usrs[i].sendToUser(msg);
+    }
 }
 
 void Channel::addUsr(User * user) {
@@ -65,8 +90,6 @@ void Channel::setTopic(std::string topic) {
 }
 
 std::string Channel::getTopic() const {
-    if (this->_topic == "")
-        return ("No topic set for this channel");
     return this->_topic;
 }
 
@@ -280,11 +303,4 @@ bool Channel::isInChannel(User *user) const {
             return true;
     }
     return false;
-}
-
-// need to corecte the condition to avoid segfault;
-User * Channel::getChanUsr(int i) {
-    if ((_usrs.size() != 0)) //&& (_usrs->empty()))
-        return &_usrs[i];
-    return &_usrs[i];
 }

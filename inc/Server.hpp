@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/08 00:21:15 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/23 18:54:24 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@
 
 #include "User.hpp"
 #include "Channel.hpp"
+#include "Messages.hpp"
 
 // Const define
 #define MAX_BUFFER 1024
@@ -62,6 +63,8 @@ public:
 	Server(int port, std::string password);
 	~Server();
 
+	// Define const server name cpp 98
+	std::string SERVER_NAME;
 
 	/* ===== BASICS ===== */
 	void	startSrv();
@@ -80,6 +83,7 @@ public:
 	int checkWritable(int fd);
 	int findChan(std::string const name) const;
 	int findUser(std::string const name) const;
+	Channel *getChannel(std::string const name);
 	
 	void	displayWelcome(User *user);
 	void	displayWrongPass(User *user);
@@ -91,19 +95,17 @@ public:
 	
 	int	getNumberUsers() const;
 
-	std::string	getTime() const;
 	std::string	getPassword() const;
 
 
 	/* ===== COMMANDS ===== */
 	void cmdList(User *user, std::string cmd);
-	void cmdPass(User *user, std::string cmd, int fd);
+	void cmdPass(User *user, std::string cmd);
 	void cmdNick(User *user, std::string cmd);
 	void cmdUser(User *user, std::string cmd);
 	void cmdQuit(User *user, std::string cmd, int fd);
 	void cmdJoin(User *user, std::string cmd);
 	void cmdPing(User *user, std::string cmd);
-	void cmdCap(User *user, std::string cmd);
 	void cmdTopic(User *user, std::string cmd);
 	void cmdNames(User *user, std::string cmd);
 	void cmdPart(User *user, std::string cmd);

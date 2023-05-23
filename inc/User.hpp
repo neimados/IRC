@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/11 21:44:50 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/23 11:32:01 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ public:
     User(pollfd Client, int fd, int socket);
     ~User();
 
+    void    sendToUser(std::string message);
+
     // Getters
     std::string getUsername() const;
     std::string getNickname() const;
@@ -37,6 +39,7 @@ public:
     bool    getVerification();
     bool    getUserVerification();
     bool    getChannelVerification();
+    bool    getIsRegistered();
     bool    getPassOk();
 
     pollfd  getPollFd();
@@ -51,6 +54,7 @@ public:
     void    setVerification(bool type);
     void    setUserVerification(bool type);
     void    setChannelVerification(bool type);
+    void    setIsRegistered(bool type);
     void    setisInChannel(int n);
     void    setWhatChannel(std::string channelName);
     void    setPassOk(int ok);
@@ -68,6 +72,7 @@ private:
     std::string _cmd;
     std::string _cmdBuffer;
 
+    bool        isRegistered;
     bool        isVerified;
     bool        userIsVerified;
     bool        isInChannel;
