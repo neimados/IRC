@@ -11,7 +11,7 @@ DEPENDS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.d))
 
 CPP		= c++
 RM		= rm -rf
-FLAGS	= -Wall -Wextra -Werror -std=c++98 -MD
+FLAGS	= -Wall -Wextra -Werror #-std=c++98 -MD
 
 $(shell mkdir -p $(dir $(OBJS)))
 

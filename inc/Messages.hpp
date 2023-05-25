@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   messages.hpp                                       :+:      :+:    :+:   */
+/*   Messages.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:48:22 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 11:26:45 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 19:03:52 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,3 +68,6 @@ std::string RPL_LISTEND (std::string nickname);
 // QUIT
 std::string RPL_QUIT (std::string nickname);
 std::string RPL_QUIT (std::string nickname, std::string message);
+
+//PIRVMSG
+std::string ERR_NOSUCHNICK(std::string nickname, std::string message);

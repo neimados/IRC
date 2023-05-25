@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmdTopic.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 11:51:31 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 16:28:06 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,12 +53,14 @@ void Server::cmdTopic(User *user, std::string cmd) {
         channel.erase(pos);
 
     pos = channel.find(" ");
-    if (pos != std::string::npos)
-        channel.erase(pos);
 
+    if (pos != std::string::npos) {
+        channel.erase(pos);
+	}
 	
-	if (topic_start != std::string::npos)
+	if (topic_start != std::string::npos) {
 		topic = cmd.substr(topic_start + 1, cmd.size() - topic_start - 1);
+	}
 	
 	int chan_index = findChan(channel);
 

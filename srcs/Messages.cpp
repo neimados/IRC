@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   messages.cpp                                       :+:      :+:    :+:   */
+/*   Messages.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:54:15 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 11:29:14 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 19:06:06 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,4 +124,9 @@ std::string RPL_QUIT (std::string nickname) {
 }
 std::string RPL_QUIT (std::string nickname, std::string message) {
     return (":" + nickname + " QUIT :" + message);
+}
+
+//PRIVMSG
+std::string ERR_NOSUCHNICK(std::string user_nick, std::string dest_nick) {
+    return ("401 " + user_nick + " " + dest_nick + " :No such nick");
 }
