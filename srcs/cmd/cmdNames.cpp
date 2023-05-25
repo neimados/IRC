@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cmdPart.cpp                                        :+:      :+:    :+:   */
+/*   cmdNames.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 10:53:31 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 11:01:45 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/Server.hpp"
 #include "../../inc/Messages.hpp"
 
-void Server::cmdPart(User* user, std::string cmd) {
-    // Remove PART from cmd
-    cmd.erase(0, 5);
+void Server::cmdNames(User* user, std::string cmd) {
+    // Remove NAMES from cmd
+    cmd.erase(0, 6);
 
     // Search for \r or \n and remove them
     size_t pos = cmd.find("\r");
@@ -30,10 +30,6 @@ void Server::cmdPart(User* user, std::string cmd) {
     std::string message = "";
     message += cmd.substr(cmd.find_first_of(" ") + 1);
 
-    if (message[0] == ':') {
-        message.erase(0, 1);
-    }
-
     // Erase the message from cmd
     if (cmd.find_first_of(" ") != std::string::npos)
         cmd.erase(cmd.find_first_of(" "));
@@ -42,7 +38,7 @@ void Server::cmdPart(User* user, std::string cmd) {
 
     // Check if channel is empty
     if (cmd.empty()) {
-        user->sendToUser(ERR_NEEDMOREPARAMS("PART"));
+        user->sendToUser(ERR_NEEDMOREPARAMS("NAMES"));
         std::cerr << RED << "Channel name is empty." << RESET << std::endl << std::endl;
         return;
     }
@@ -75,35 +71,17 @@ void Server::cmdPart(User* user, std::string cmd) {
         }
 
         // Check if user is in the channel
-        if (!_channels[chanIndex].isInChannel(user)) {
+        if (!_channels[chanIndex].isInChannel(user) && _channels[chanIndex].getIsPrivate()) {
             user->sendToUser(ERR_NOTONCHANNEL(user->getNickname(), channelName));
             std::cerr << RED << "User `" << user->getNickname() << "` is not in channel `" << channelName << "`." << RESET << std::endl << std::endl;
             continue;
         }
 
-        // Remove chan in user's list
-        user->delChannel(_channels[chanIndex].getName());
+        // Sending list of users
+        user->sendToUser(RPL_NAMREPLY(user->getNickname(), _channels[chanIndex].getName(), _channels[chanIndex].getChanUsrs()));
+        user->sendToUser(RPL_ENDOFNAMES(user->getNickname(), _channels[chanIndex].getName()));
 
-        // Remove user from the channel
-        _channels[chanIndex].delUsr(user);
-
-        // Send to message to the user and the channels
-        if (!message.empty()) {
-            user->sendToUser(RPL_PART(user->getNickname(), channelName, message));
-            _channels[chanIndex].sendToChannel(RPL_PART(user->getNickname(), channelName, message));
-        }
-        else {
-            _channels[chanIndex].sendToChannel(RPL_PART(user->getNickname(), channelName));
-            user->sendToUser(RPL_PART(user->getNickname(), channelName));
-        }
-
-        std::cout << CYAN << "User `" << user->getNickname() << "` left channel `" << channelName << "`." << RESET << std::endl << std::endl;
-
-        // If the channel is empty, delete it
-        if (_channels[chanIndex].getChanUsrs().empty()) {
-            _channels.erase(_channels.begin() + chanIndex);
-            std::cout << ORANGE << "Channel `" << channelName << "` deleted." << RESET << std::endl << std::endl;
-        }
+        std::cout << CYAN << "List of `" << channelName << "` is `" << RPL_NAMREPLY(user->getNickname(), _channels[chanIndex].getName(), _channels[chanIndex].getChanUsrs()) << "`." << RESET << std::endl << std::endl;
     }
 
     // Clear channels vector and message

@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/23 11:46:03 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 10:08:40 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,9 @@ void Server::cmdUser(User *user, std::string cmd) {
     }
 
     // Check if user is in a channel
-    if (user->getWhatChannel() != "") {
+    if (user->getAllChans().size() != 0) {
         for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); ++it) {
-            if (it->getName() == user->getWhatChannel()) {
+            if (!user->isInChan(it->getName())) {
                 it->updateUser(user);
                 break ;
             }

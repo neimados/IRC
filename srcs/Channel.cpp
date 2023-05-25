@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/23 16:33:22 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 11:46:10 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ Channel::Channel(std::string name):
     _externalMessage(true),
     _isModerated(false),
     _isPrivate(false),
-    _isTopicSettable(false)
+    _isTopicSettable(true)
     {}
 Channel::~Channel() {}
 
@@ -98,12 +98,10 @@ std::string Channel::getChanUsrs() const {
 
     for (size_t i = 0; i < this->_usrs.size(); i++)
     {
-        if (this->isVoiced(this->_usrs[i]))
-            list += "+";
-        else if (this->isOperator(this->_usrs[i]))
+        if (this->isOperator(this->_usrs[i]))
             list += "@";
-        else
-            list += " ";
+        else if (this->isVoiced(this->_usrs[i]))
+            list += "+";
         
         list += this->_usrs[i].getNickname();
         

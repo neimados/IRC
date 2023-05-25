@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/23 18:54:24 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 10:54:48 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,10 +84,6 @@ public:
 	int findChan(std::string const name) const;
 	int findUser(std::string const name) const;
 	Channel *getChannel(std::string const name);
-	
-	void	displayWelcome(User *user);
-	void	displayWrongPass(User *user);
-	void	sendAllIfInChannel(User *user, std::string msg);
 
 
 	/* ===== GETTERS ===== */

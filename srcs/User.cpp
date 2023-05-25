@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/23 11:31:51 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 10:49:57 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,9 +94,10 @@ pollfd  User::getPollFd() {
 bool     User::getisInChannel() {
     return this->isInChannel;
 }
-std::string User::getWhatChannel() const {
-    return this->whatChannel;
-}
+
+// std::string User::getWhatChannel() const {
+//     return this->whatChannel;
+// }
 
 // Setters
 void    User::setNickname(std::string nickname) {
@@ -123,9 +124,9 @@ void    User::setChannelVerification(bool type) {
 void    User::setisInChannel(int n) {
     this->isInChannel = n;
 }
-void    User::setWhatChannel(std::string channelName) {
-    this->whatChannel = channelName;
-}
+// void    User::setWhatChannel(std::string channelName) {
+//     this->whatChannel = channelName;
+// }
 void    User::setPassOk(int ok) {
     this->passOk = ok;
 }
@@ -137,4 +138,51 @@ void    User::setBuffer(std::string cmd) {
 }
 void    User::setIsRegistered(bool type) {
     this->isRegistered = type;
+}
+
+
+// New channels manager
+std::vector<std::string> User::getAllChans() {
+    return this->_chans;
+}
+
+bool User::isInChan(const std::string &name) {
+    if (name.size() == 0)
+        return false;
+
+    // A loop that checks channel's name
+    for (std::vector<std::string>::iterator it = _chans.begin(); it != _chans.end(); it++) {
+		if (*it == name)
+            return true;
+	}
+    return false;
+}
+
+void    User::addChannel(const std::string &name) {
+    if (name.size() == 0)
+        return;
+
+    // Check if it already in the list ; then add it
+    if (!isInChan(name))
+        _chans.push_back(name);
+}
+
+void    User::delChannel(const std::string &name) {
+    if (name.size() == 0)
+        return;
+
+    // A loop that checks channel's name and erase it
+    for (size_t i = 0; i < this->_chans.size(); i++) {
+		if (_chans[i] == name)
+           this->_chans.erase(_chans.begin() + i);
+	}
+
+    if (_chans.size() == 0) {
+        this->setIsInChan(false);
+    }
+}
+
+void    User::setIsInChan(bool state) {
+    if (this->isInChannel != state)
+        this->isInChannel = state;
 }

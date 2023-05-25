@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/23 17:03:49 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 11:20:50 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,24 @@
 #include "../../inc/Messages.hpp"
 
 void addUserInChan(User *user, Channel &chan) {
-    user->setisInChannel(true);
-    user->setWhatChannel(chan.getName());
+    user->setIsInChan(true);
+    user->addChannel(chan.getName());
 
     // Send message to all users in channel
     chan.sendToChannel(RPL_JOIN(user->getNickname(), chan.getName()));
     
     // Send message to user
-    user->sendToUser(RPL_TOPIC(user->getNickname(), chan.getName(), chan.getTopic()));
+    if (chan.getTopic().size() == 0)
+        user->sendToUser(RPL_NOTOPIC(user->getNickname(), chan.getName()));
+    else
+        user->sendToUser(RPL_TOPIC(user->getNickname(), chan.getName(), chan.getTopic()));
 
-    // NAME REPLY
-    chan.sendToChannel(RPL_NAMREPLY(user->getNickname(), chan.getName(), chan.getChanUsrs()));
-    chan.sendToChannel(RPL_ENDOFNAMES(user->getNickname(), chan.getName()));
+    // NAME REPLY to user
+    user->sendToUser(RPL_NAMREPLY(user->getNickname(), chan.getName(), chan.getChanUsrs()));
+    user->sendToUser(RPL_ENDOFNAMES(user->getNickname(), chan.getName()));
+    
+    // chan.sendToChannel(RPL_NAMREPLY(user->getNickname(), chan.getName(), chan.getChanUsrs()));
+    // chan.sendToChannel(RPL_ENDOFNAMES(user->getNickname(), chan.getName()));
 }
 
 void Server::cmdJoin(User *user, std::string cmd) {
@@ -71,7 +77,7 @@ void Server::cmdJoin(User *user, std::string cmd) {
         }
 
         // Check if user is already in channel
-        if (user->getisInChannel() && user->getWhatChannel() == *it) {
+        if (user->isInChan(*it)) {
             user->sendToUser(ERR_ALREADYREGISTRED(user->getNickname()));
             std::cerr << RED << "User `" << user->getNickname() << "` is already in channel `" << *it << "`." << RESET << std::endl << std::endl;
             continue ;
@@ -84,15 +90,12 @@ void Server::cmdJoin(User *user, std::string cmd) {
         if (chan_index == -1) {
             Channel chan(*it);
 
-            // Remove user from previous channel
-            if (user->getisInChannel() && user->getWhatChannel() != *it)
-                cmdPart(user, "PART " + user->getWhatChannel());
-
             // Update chan index if part deleted one
             chan_index = findChan(*it);
 
             // Add user to channel
             chan.addUsr(user);
+            chan.addVoiced(user, user);
             chan.addOperator(user, user);
 
             addUserInChan(user, chan);
@@ -100,30 +103,13 @@ void Server::cmdJoin(User *user, std::string cmd) {
 
             std::cout << GREEN << "User `" << user->getNickname() << "` created and joined channel `" << *it << "` as operator." << RESET << std::endl << std::endl;
         } else {
-            // Remove user from previous channel
-            if (user->getisInChannel() && user->getWhatChannel() != *it)
-                cmdPart(user, "PART " + user->getWhatChannel());
-            
             // Update chan index if part deleted one
             chan_index = findChan(*it);
             
             // Add user to channel
             _channels[chan_index].addUsr(user);
 
-            // addUserInChan(user, _channels[chan_index]);
-            
-            user->setisInChannel(true);
-            user->setWhatChannel(*it);
-            
-            // Send message to all users in channel
-            _channels[chan_index].sendToChannel(RPL_JOIN(user->getNickname(), _channels[chan_index].getName()));
-            
-            // Send message to user
-            user->sendToUser(RPL_TOPIC(user->getNickname(), _channels[chan_index].getName(), _channels[chan_index].getTopic()));
-            
-            // NAME REPLY
-            _channels[chan_index].sendToChannel(RPL_NAMREPLY(user->getNickname(), _channels[chan_index].getName(), _channels[chan_index].getChanUsrs()));
-            _channels[chan_index].sendToChannel(RPL_ENDOFNAMES(user->getNickname(), _channels[chan_index].getName()));
+            addUserInChan(user, _channels[chan_index]);
             
             std::cout << GREEN << "User `" << user->getNickname() << "` joined channel `" << *it << "`." << RESET << std::endl << std::endl;
         }

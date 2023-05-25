@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/23 11:32:01 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/25 10:50:13 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 
 
 class Server;
+class Channel;
 
 class User {
 
@@ -43,20 +44,31 @@ public:
     bool    getPassOk();
 
     pollfd  getPollFd();
-    bool     getisInChannel();
-    std::string getWhatChannel() const;
+    // std::string getWhatChannel() const;
+
+    std::vector<std::string>    getAllChans();
+
+    bool    getisInChannel();
+    bool    isInChan(const std::string &name);
+    
+    void    addChannel(const std::string &name);
+    void    delChannel(const std::string &name);
+    void    setIsInChan(bool state);
     
     // Setters
     void    setNickname(std::string nickname);
     void    setPassword(std::string password);
     void    setUsername(std::string username);
+
     void    setPort(int fd);
+    void    setIsRegistered(bool type);
     void    setVerification(bool type);
     void    setUserVerification(bool type);
     void    setChannelVerification(bool type);
-    void    setIsRegistered(bool type);
+    
     void    setisInChannel(int n);
-    void    setWhatChannel(std::string channelName);
+    // void    setWhatChannel(std::string channelName);
+    
     void    setPassOk(int ok);
     void    setHostname(std::string hostname);
     void    setBuffer(std::string cmd);
@@ -78,7 +90,8 @@ private:
     bool        isInChannel;
     bool        passOk;
 
-    std::string whatChannel;
+    // std::string whatChannel;
+    std::vector<std::string> _chans;
 
     // User(const User &u);
     // User &operator=(const User &u);
