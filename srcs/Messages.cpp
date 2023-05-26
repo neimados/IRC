@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Messages.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:54:15 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 19:06:06 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/26 13:19:21 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,15 +78,15 @@ std::string RPL_ENDOFNAMES (std::string nickname, std::string channel) {
 std::string RPL_JOIN (std::string nickname, std::string channel) {
     return (":" + nickname + " JOIN " + channel);
 }
+// std::string RPL_JOIN (std::string nickname, std::string realname, std::string channel) {
+//     return (":" + nickname + " JOIN " + channel + " " + realname);
+// }
 
 std::string ERR_NOSUCHCHANNEL (std::string nickname, std::string channel) {
     return ("403 " + nickname + " " + channel + " :No such channel");
 }
 std::string ERR_TOOMANYCHANNELS (std::string nickname, std::string channel) {
     return ("405 " + nickname + " " + channel + " :You have joined too many channels");
-}
-std::string ERR_TOOMANYTARGETS (std::string nickname, std::string channel) {
-    return ("407 " + nickname + " " + channel + " :Duplicate recipients. No message delivered");
 }
 std::string ERR_INVITEONLYCHAN (std::string nickname, std::string channel) {
     return ("473 " + nickname + " " + channel + " :Cannot join channel (+i)");
@@ -126,7 +126,34 @@ std::string RPL_QUIT (std::string nickname, std::string message) {
     return (":" + nickname + " QUIT :" + message);
 }
 
-//PRIVMSG
+// PRIVMSG
+std::string RPL_PRIVMSG(std::string nickname, std::string channel, std::string message) {
+    return (":" + nickname + " PRIVMSG " + channel + " :" + message);
+}
+
+std::string ERR_NORECIPIENT(std::string nickname, std::string message) {
+    return ("411 " + nickname + " " + message + " :No recipient given");
+}
+std::string ERR_CANNOTSENDTOCHAN(std::string nickname, std::string channel) {
+    return ("404 " + nickname + " " + channel + " :Cannot send to channel");
+}
+std::string ERR_WILDTOPLEVEL(std::string nickname, std::string message) {
+    return ("414 " + nickname + " " + message + " :Wildcard in toplevel domain");
+}
 std::string ERR_NOSUCHNICK(std::string user_nick, std::string dest_nick) {
-    return ("401 " + user_nick + " " + dest_nick + " :No such nick");
+    return ("401 " + user_nick + " " + dest_nick + " :No such nick/channel");
+}
+std::string ERR_NOTEXTTOSEND(std::string nickname) {
+    return ("412 " + nickname + " :No text to send");
+}
+std::string ERR_NOTOPLEVEL(std::string nickname, std::string message) {
+    return ("413 " + nickname + " " + message + " :No toplevel domain specified");
+}
+std::string ERR_TOOMANYTARGETS (std::string nickname, std::string channel) {
+    return ("407 " + nickname + " " + channel + " :Duplicate recipients. No message delivered");
+}
+
+// Notice
+std::string RPL_NOTICE(std::string nickname, std::string channel, std::string message) {
+    return (":" + nickname + " NOTICE " + channel + " :" + message);
 }

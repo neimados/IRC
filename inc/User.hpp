@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:48:25 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 10:50:13 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/26 13:19:38 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ public:
     std::string getNickname() const;
     std::string getPassword() const;
     std::string getHostname() const;
+    // std::string getRealname() const;
     std::string getBuffer() const;
 
     int     getFd() const;
@@ -59,6 +60,7 @@ public:
     void    setNickname(std::string nickname);
     void    setPassword(std::string password);
     void    setUsername(std::string username);
+    // void    setRealname(std::string realname);
 
     void    setPort(int fd);
     void    setIsRegistered(bool type);
@@ -78,6 +80,7 @@ private:
     int         _fd;
     int         _socket;
     std::string _username;
+    // std::string _realname;
     std::string _nickname;
     std::string _password;
     std::string _hostname;

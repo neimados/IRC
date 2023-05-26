@@ -4,7 +4,9 @@ SRCSDIR	= srcs/
 SRCS	= main.cpp Server.cpp User.cpp Channel.cpp Messages.cpp \
 			cmd/cmdNick.cpp cmd/cmdPass.cpp cmd/cmdUser.cpp \
 			cmd/cmdJoin.cpp cmd/cmdPart.cpp cmd/cmdList.cpp  \
-			cmd/cmdQuit.cpp cmd/cmdNames.cpp cmd/cmdTopic.cpp
+			cmd/cmdQuit.cpp cmd/cmdNames.cpp cmd/cmdTopic.cpp \
+			cmd/cmdPrivmsg.cpp cmd/cmdNotice.cpp
+			
 OBJDIR	= objs/
 OBJS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.o))
 DEPENDS	= $(addprefix $(OBJDIR), $(SRCS:.cpp=.d))

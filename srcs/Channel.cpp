@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/25 11:46:10 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/26 12:31:58 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 Channel::Channel(std::string name):
     _name(name),
     _topic(""),
-    _externalMessage(true),
+    _externalMessage(false),
     _isModerated(false),
     _isPrivate(false),
     _isTopicSettable(true)

@@ -22,7 +22,7 @@
 - ✅ TOPIC         (channel)
 - 🚧 INVITE        (channel)
 - 🚧 KICK          (channel)
-- 🚧 PRIVMSG       (message)
+-   🚧 PRIVMSG       (message)
 - 🚧 NOTICE        (message)
 - 🚧 MODE          (channel)
 

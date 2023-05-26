@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Messages.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:48:22 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 19:03:52 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/26 13:19:13 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,10 @@ std::string RPL_ENDOFNAMES (std::string nickname, std::string channel);
 
 // JOIN
 std::string RPL_JOIN (std::string nickname, std::string channel);
+// std::string RPL_JOIN (std::string nickname, std::string realname, std::string channel);
 
 std::string ERR_NOSUCHCHANNEL (std::string nickname, std::string channel);
 std::string ERR_TOOMANYCHANNELS (std::string nickname, std::string channel);
-std::string ERR_TOOMANYTARGETS (std::string nickname, std::string channel);
 std::string ERR_INVITEONLYCHAN (std::string nickname, std::string channel);
 
 // PART
@@ -69,5 +69,16 @@ std::string RPL_LISTEND (std::string nickname);
 std::string RPL_QUIT (std::string nickname);
 std::string RPL_QUIT (std::string nickname, std::string message);
 
-//PIRVMSG
+// PRIVMSG
+std::string RPL_PRIVMSG(std::string nickname, std::string channel, std::string message);
+
+std::string ERR_NORECIPIENT(std::string nickname, std::string message);
+std::string ERR_CANNOTSENDTOCHAN(std::string nickname, std::string channel);
+std::string ERR_WILDTOPLEVEL(std::string nickname, std::string message);
 std::string ERR_NOSUCHNICK(std::string nickname, std::string message);
+std::string ERR_NOTEXTTOSEND(std::string nickname);
+std::string ERR_NOTOPLEVEL(std::string nickname, std::string message);
+std::string ERR_TOOMANYTARGETS(std::string nickname, std::string message);
+
+// NOTICE
+std::string RPL_NOTICE(std::string nickname, std::string channel, std::string message);

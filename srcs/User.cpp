@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 10:49:57 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/26 13:19:49 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,9 @@ void    User::sendToUser(std::string message) {
 std::string User::getUsername() const {
     return this->_username;
 }
+// std::string User::getRealname() const {
+//     return this->_realname;
+// }
 std::string User::getNickname() const {
     return this->_nickname;
 }
@@ -109,6 +112,9 @@ void    User::setPassword(std::string password) {
 void    User::setUsername(std::string username) {
     this->_username = username;
 }
+// void    User::setRealname(std::string realname) {
+//     this->_realname = realname;
+// }
 void    User::setPort(int fd) {
     this->_fd = fd;
 }

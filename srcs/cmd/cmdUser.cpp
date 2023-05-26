@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 10:08:40 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/26 13:18:05 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ void Server::cmdUser(User *user, std::string cmd) {
     // Set infos
     user->setUsername(username);
     user->setHostname(hostname);
+    // user->setRealname(realname);
 
     // Set isRegistered to true
     user->setUserVerification(true);
