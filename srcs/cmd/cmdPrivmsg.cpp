@@ -39,13 +39,6 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
     pos = cmd.find("\n");
     if (pos != std::string::npos)
         cmd.erase(pos);
-
-    // Check if empty
-    if (cmd.empty()) {
-        user->sendToUser(ERR_NEEDMOREPARAMS(user->getNickname()));
-        std::cout << RED << BOLD << "Invalid PRIVMSG message : empty." << RESET << std::endl << std::endl;
-        return;
-    }
     
     // Check for message
 	msg_start = cmd.find_first_of(":");
@@ -94,6 +87,17 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 		
 	size_t i = 0;
 
+	//check duplicates
+	for (size_t j = 0; j < destinataires.size(); j++) {
+		for (size_t k = 0; k < destinataires.size(); k++) {
+			if (destinataires[j] == destinataires[k] && j != k) {
+				sendToUser(user, ERR_TOOMANYTARGETS(user->getNickname(), destinataires[i]));
+				std::cout << RED << BOLD << "Duplicate recipients." << RESET << std::endl << std::endl;
+				return;
+			}
+		}
+	}
+
 	// Checking all the strings in the vector destinataires if it's a channel or a user
 	for (i = 0; i < destinataires.size(); i++) {
         if (destinataires[i][0] == '#') {
@@ -103,7 +107,7 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
             // Check if the channel exists
 			if (chan_index == -1) {
 				// Send the error message to the user
-				sendToUser(user, ERR_NOSUCHCHANNEL(user->getNickname(), destinataires[i]));
+				sendToUser(user, ERR_CANNOTSENDTOCHAN(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "Channel " << destinataires[i] << " doesn't exist." << RESET << std::endl << std::endl;
 				continue;
 			}
@@ -122,7 +126,7 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 
 			// Check if the user is in the channel or if the user is an operator or a voiced user
 			if (!_channels[chan_index].getExternalMessage() && !_channels[chan_index].isInChannel(user)) {
-                user->sendToUser(ERR_NOTONCHANNEL(user->getNickname(), destinataires[i]));
+                user->sendToUser(ERR_CANNOTSENDTOCHAN(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "User " << user->getNickname() << " is not in the channel " << destinataires[i] << " without external messages." << RESET << std::endl << std::endl;
 				continue;
 			}
