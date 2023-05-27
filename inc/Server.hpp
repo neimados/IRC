@@ -83,6 +83,7 @@ public:
 	int findChan(std::string const name) const;
 	int findUser(std::string const name) const;
 	Channel *getChannel(std::string const name);
+	std::string clearString(std::string str);
 
 
 	/* ===== GETTERS ===== */
