@@ -444,15 +444,16 @@ int Server::findUser(std::string const name) const {
 }
 
 Channel* Server::getChannel(std::string const name) {
+	Channel *tmp = NULL;
 	if (name[0] != '#')
-		return nullptr;
+		return tmp;
 	
 	// Search and return a channel by its name
 	for (size_t i = 0; i < _channels.size(); i++) {
 		if (_channels[i].getName() == name)
 			return &_channels[i];
 	}
-	return nullptr;
+	return tmp;
 }
 
 /* ===== GETTERS ===== */
