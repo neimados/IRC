@@ -80,7 +80,6 @@ public:
 	
 	
 	/* ===== UTILS ===== */
-	int checkWritable(int fd);
 	int findChan(std::string const name) const;
 	int findUser(std::string const name) const;
 	Channel *getChannel(std::string const name);

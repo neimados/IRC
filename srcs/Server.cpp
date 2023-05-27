@@ -346,9 +346,7 @@ void Server::sendToUser(User *user, std::string msg) {
 	const void *cmsg = msg.c_str();
 
 	if (user->getVerification()) {
-		if (checkWritable(user->getFd())) {
-			send(user->getFd(), cmsg, msg.size(), 0);
-		}
+		send(user->getFd(), cmsg, msg.size(), 0);
 	}
 }
 
@@ -396,35 +394,11 @@ void Server::sendToUserInChan(User *user, std::string code, std::string chan, st
 	const void *cmsg = msg.c_str();
 
 	if (user->getVerification()) {
-		if (checkWritable(user->getFd())) {
-			send(user->getFd(), cmsg, msg.size(), 0);
-		}
+		send(user->getFd(), cmsg, msg.size(), 0);
 	}
 }
 
 /* ===== UTILS ===== */
-
-int Server::checkWritable(int fd) {
-	struct pollfd pfd;
-	
-	pfd.fd = fd;
-	pfd.events = POLLOUT;
-	pfd.revents = 0;
-
-	int ret = poll(&pfd, 1, 0);
-
-	if (ret < 0) {
-		std::cout << RED << BOLD << "Error POLLOUT for User " << fd << RESET << std::endl;
-		return 0;
-	} else if (ret == 0) {
-		std::cout << RED << BOLD << "Fd " << fd << " for User not ready for writing." << RESET << std::endl;
-	}
-
-	if (pfd.revents & POLLOUT)
-		return 1;
-
-	return 0;
-}
 
 int Server::findChan(std::string const name) const {
 	for (size_t i = 0; i < _channels.size(); i++) {
