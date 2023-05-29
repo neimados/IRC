@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/26 12:31:58 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/29 16:30:08 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ Channel::Channel(std::string name):
     _externalMessage(false),
     _isModerated(false),
     _isPrivate(false),
-    _isTopicSettable(true)
+    _isTopicSettable(true),
+    _botIsActivated(false)
     {}
 Channel::~Channel() {}
 
@@ -301,4 +302,17 @@ bool Channel::isInChannel(User *user) const {
             return true;
     }
     return false;
+}
+
+bool Channel::getBotIsActivated() const {
+    return this->_botIsActivated;
+}
+
+void Channel::activateBot() {
+    this->_botIsActivated = 1;
+    return;
+}
+
+void Channel::desactivateBot(){
+    this->_botIsActivated = 0;
 }

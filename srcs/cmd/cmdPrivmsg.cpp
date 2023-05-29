@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmdPrivmsg.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:10:12 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/29 16:27:34 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,40 @@ void sendPrivmsg(std::string sender, std::string dest, std::string msg, std::vec
             continue;
         users[i].sendToUser(RPL_PRIVMSG(sender, dest, msg));
     }
+}
+
+void Server::botSendMsg(std::string sender, std::string dest, std::string msg, std::vector<User> users) {
+	
+	int i;
+	int range = 19 - 0 + 1;
+	i = rand() % range + 0;
+	
+	(void)  msg; 
+	std::stringstream buffer;
+	std::string buff;
+
+	std::ifstream ifs("text.txt");
+	if (!ifs.good())
+	{
+		std::cout << "Infile error for text.txt" << std::endl;
+		return;
+	}
+
+	buffer << ifs.rdbuf();
+	buff = buffer.str();
+
+	size_t pos;
+	std::string delimiter = "\n";
+	std::string token;
+	std::vector<std::string> text;
+
+	while ((pos = buff.find(delimiter)) != std::string::npos) {
+	    token = buff.substr(0, pos);
+	    text.push_back(token);
+	    buff.erase(0, pos + delimiter.length());
+	};
+
+	sendPrivmsg(sender, dest, text[i], users);
 }
 
 void Server::cmdPrivmsg(User *user, std::string cmd) {
@@ -131,9 +165,27 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 				continue;
 			}
     
+			if (msg == "!bot") {
+				if(_channels[chan_index].getBotIsActivated() == 0) {
+					_channels[chan_index].activateBot();
+					std::cout << CYAN << BOLD << user->getNickname() << " activated the bot in chan " << destinataires[i] << RESET << std::endl << std::endl;
+				}
+				else {
+					_channels[chan_index].desactivateBot();
+					std::cout << CYAN << BOLD << user->getNickname() << " desactivated the bot in chan " << destinataires[i] << RESET << std::endl << std::endl;
+				}
+			}
+		
+		
 			// Send the message to the channel
 			sendPrivmsg(user->getNickname(), destinataires[i], msg, _channels[chan_index].getUsers());
 			std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
+		
+
+			if (_channels[chan_index].getBotIsActivated() == 1) {
+				botSendMsg("BOT", destinataires[i], msg, _channels[chan_index].getUsers());
+				std::cout << GREEN << BOLD << "BOT" << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
+			}
 		}
 		else {
 			// Destinataires[i] is a username

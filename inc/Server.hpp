@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 10:54:48 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/29 15:59:10 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <map>
 #include "poll.h"
 #include <sys/socket.h>
@@ -77,7 +78,7 @@ public:
 	void	sendAllUsersInChan(std::string chan, std::string msg);
 	void	sendPrivMsgInChan(std::string chan, std::string msg, std::string user);
 	void	sendToUserInChan(User *user, std::string code, std::string chan, std::string msg);
-	
+	void	botSendMsg(std::string sender, std::string dest, std::string msg, std::vector<User> users);
 	
 	/* ===== UTILS ===== */
 	int findChan(std::string const name) const;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
+/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 19:13:05 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/23 16:33:28 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/29 16:14:01 by guyar            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ public:
 
     void sendToChannel(std::string msg, User *sender);
     void sendToChannel(std::string msg);
+    void activateBot();
+    void desactivateBot();
     
     void addUsr(User *user);
     bool delUsr(User *user);
@@ -33,6 +35,8 @@ public:
     bool getIsModerated() const;
     bool getIsPrivate() const;
     bool getIsTopicSettable() const;
+    bool getBotIsActivated() const;
+
     
     std::string getName() const;
     std::string getTopic() const;
@@ -69,7 +73,8 @@ private:
     std::vector<User>         _usrs;
 
     // Vector of int for the operators fd
-    std::vector<int>          _ops;
+    std::vector<int>          
+    _ops;
     // Vector of int for the voiced fd
     std::vector<int>          _voiced;
 
@@ -77,5 +82,6 @@ private:
     bool _isModerated;
     bool _isPrivate;
     bool _isTopicSettable;
+    bool _botIsActivated;
     
 };
