@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/29 16:30:08 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/30 20:03:45 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,9 @@ std::string Channel::getTopic() const {
 
 std::string Channel::getChanUsrs() const {
     std::string list = "";
+
+    if (this->getBotIsActivated())
+        list += "+BOT ";
 
     for (size_t i = 0; i < this->_usrs.size(); i++)
     {

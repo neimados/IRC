@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   cmdPrivmsg.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/29 16:27:34 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/30 20:39:35 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/Server.hpp"
 #include "../../inc/Messages.hpp"
 
-void sendPrivmsg(std::string sender, std::string dest, std::string msg, std::vector<User> users) {
+static void sendPrivmsg(std::string sender, std::string dest, std::string msg, std::vector<User> users) {
     if (msg.size() == 0 || dest.size() == 0 || sender.size() == 0)
         return;
     
@@ -24,13 +24,20 @@ void sendPrivmsg(std::string sender, std::string dest, std::string msg, std::vec
     }
 }
 
-void Server::botSendMsg(std::string sender, std::string dest, std::string msg, std::vector<User> users) {
-	
+static void sendPrivmsgToChan(std::string sender, std::string dest, std::string msg, std::vector<User> users) {
+    if (msg.size() == 0 || dest.size() == 0 || sender.size() == 0)
+        return;
+    
+    for (size_t i = 0; i < users.size(); i++) {
+        users[i].sendToUser(RPL_PRIVMSG(sender, dest, msg));
+    }
+}
+
+static void botSendMsg(std::string sender, std::string dest, std::vector<User> users) {
 	int i;
 	int range = 19 - 0 + 1;
 	i = rand() % range + 0;
 	
-	(void)  msg; 
 	std::stringstream buffer;
 	std::string buff;
 
@@ -79,7 +86,6 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 	if (msg_start == std::string::npos) {        
         // Sending ERR_NOTEXTTOSEND
         user->sendToUser(ERR_NOTEXTTOSEND(user->getNickname()));
-
 		std::cout << RED << BOLD << "Invalid PRIVMSG message : no text to send." << RESET << std::endl << std::endl;
 		return;
 	}
@@ -91,7 +97,6 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
     if (cmd.find_first_of(" ") == std::string::npos){
         // Sending ERR_NORECIPIENT
         user->sendToUser(ERR_NORECIPIENT(user->getNickname(), "PRIVMSG"));
-
 		std::cout << RED << BOLD << "Invalid PRIVMSG message." << RESET << std::endl << std::endl;
 		return;
 	}
@@ -114,10 +119,12 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 	destinataires.push_back(cmd);
 	std::cout << "FROM :" << CYAN << BOLD << user->getNickname() << RESET << std::endl;
     std::cout << "TO   :";
+
     for (size_t i = 0; i < destinataires.size(); i++)
         std::cout << CYAN << BOLD << destinataires[i] << RESET << " ";
+		
     std::cout << std::endl;
-    std::cout << "MSG  :" << CYAN << BOLD << msg << RESET << std::endl << std::endl;
+    std::cout << "MSG  :" << CYAN << BOLD << msg << RESET << std::endl;
 		
 	size_t i = 0;
 
@@ -166,12 +173,20 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 			}
     
 			if (msg == "!bot") {
-				if(_channels[chan_index].getBotIsActivated() == 0) {
+				if(!_channels[chan_index].getBotIsActivated()) {
 					_channels[chan_index].activateBot();
+					
+					sendPrivmsgToChan(user->getNickname(), destinataires[i], "Bot activated by " + user->getNickname(), _channels[chan_index].getUsers());
+					cmdNames(user, "NAMES " + _channels[chan_index].getName());
+					
 					std::cout << CYAN << BOLD << user->getNickname() << " activated the bot in chan " << destinataires[i] << RESET << std::endl << std::endl;
 				}
 				else {
 					_channels[chan_index].desactivateBot();
+					
+					sendPrivmsgToChan(user->getNickname(), destinataires[i], "Bot desactivated by " + user->getNickname(), _channels[chan_index].getUsers());
+					cmdNames(user, "NAMES " + _channels[chan_index].getName());
+					
 					std::cout << CYAN << BOLD << user->getNickname() << " desactivated the bot in chan " << destinataires[i] << RESET << std::endl << std::endl;
 				}
 			}
@@ -179,11 +194,11 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 		
 			// Send the message to the channel
 			sendPrivmsg(user->getNickname(), destinataires[i], msg, _channels[chan_index].getUsers());
-			std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
+			std::cout << GREEN << BOLD << user->getNickname() << " sent `" << msg << "` to " << destinataires[i] << RESET << std::endl << std::endl;
 		
 
 			if (_channels[chan_index].getBotIsActivated() == 1) {
-				botSendMsg("BOT", destinataires[i], msg, _channels[chan_index].getUsers());
+				botSendMsg("BOT", destinataires[i], _channels[chan_index].getUsers());
 				std::cout << GREEN << BOLD << "BOT" << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
 			}
 		}
@@ -200,7 +215,7 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
             
             // Send the message to the user
             _usrs[user_index].sendToUser(RPL_PRIVMSG(user->getNickname(), destinataires[i], msg));
-            std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
+            std::cout << GREEN << BOLD << user->getNickname() << " sent `" << msg << "` to " << destinataires[i] << RESET << std::endl << std::endl;
 		}
     }
 }

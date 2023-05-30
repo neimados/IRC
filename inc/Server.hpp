@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/29 15:59:10 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/30 20:30:17 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,18 +73,17 @@ public:
 	void	parseCmd(int fd);
 	void	disconnectUser(User *user, int fd);
 	void	execCmd(User *user, std::string cmd, int fd);
+	
 	void	sendToUser(User *user, std::string msg);
 	void	sendUserInChan(User *user, std::string chan);
 	void	sendAllUsersInChan(std::string chan, std::string msg);
-	void	sendPrivMsgInChan(std::string chan, std::string msg, std::string user);
-	void	sendToUserInChan(User *user, std::string code, std::string chan, std::string msg);
-	void	botSendMsg(std::string sender, std::string dest, std::string msg, std::vector<User> users);
 	
 	/* ===== UTILS ===== */
 	int findChan(std::string const name) const;
 	int findUser(std::string const name) const;
-	Channel *getChannel(std::string const name);
-	std::string clearString(std::string str);
+	
+	Channel	*getChannel(std::string const name);
+	std::string	clearString(std::string str);
 
 
 	/* ===== GETTERS ===== */
@@ -102,7 +101,6 @@ public:
 	void cmdUser(User *user, std::string cmd);
 	void cmdQuit(User *user, std::string cmd, int fd);
 	void cmdJoin(User *user, std::string cmd);
-	void cmdPing(User *user, std::string cmd);
 	void cmdTopic(User *user, std::string cmd);
 	void cmdNames(User *user, std::string cmd);
 	void cmdPart(User *user, std::string cmd);

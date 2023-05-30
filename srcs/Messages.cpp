@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:54:15 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:19:21 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 19:34:18 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,6 @@ std::string RPL_ENDOFNAMES (std::string nickname, std::string channel) {
 std::string RPL_JOIN (std::string nickname, std::string channel) {
     return (":" + nickname + " JOIN " + channel);
 }
-// std::string RPL_JOIN (std::string nickname, std::string realname, std::string channel) {
-//     return (":" + nickname + " JOIN " + channel + " " + realname);
-// }
 
 std::string ERR_NOSUCHCHANNEL (std::string nickname, std::string channel) {
     return ("403 " + nickname + " " + channel + " :No such channel");
@@ -153,7 +150,31 @@ std::string ERR_TOOMANYTARGETS (std::string nickname, std::string channel) {
     return ("407 " + nickname + " " + channel + " :Duplicate recipients. No message delivered");
 }
 
-// Notice
+// NOTICE
 std::string RPL_NOTICE(std::string nickname, std::string channel, std::string message) {
     return (":" + nickname + " NOTICE " + channel + " :" + message);
+}
+
+
+// MODE
+std::string RPL_CHANNELMODEIS(std::string nickname, std::string channel, std::string mode) {
+    return ("324 " + nickname + " " + channel + " " + mode);
+}
+
+std::string ERR_UNKNOWNMODE(std::string nickname, std::string mode) {
+    return ("472 " + nickname + " " + mode + " :is unknown mode char to me");
+}
+
+std::string ERR_USERSDONTMATCH(std::string nickname) {
+    return ("502 " + nickname + " :Cant change mode for other users");
+}
+
+
+// KICK
+std::string RPL_KICK(std::string nickname, std::string channel, std::string user, std::string message) {
+    return (":" + nickname + " KICK " + channel + " " + user + " :" + message);
+}
+
+std::string ERR_USERNOTINCHANNEL(std::string nickname, std::string user, std::string channel) {
+    return ("441 " + nickname + " " + user + " " + channel + " :They aren't on that channel");
 }

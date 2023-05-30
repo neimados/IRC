@@ -1,4 +1,4 @@
-# Run:
+# Run
 - make test
 - Or
 - make && ./ircserv "port" "password"
@@ -13,7 +13,6 @@
 - ✅ NICK
 - ✅ PASS
 - ✅ USER
-- 🚧 PING
 - ✅ QUIT
 - ✅ LIST          (channel)
 - ✅ JOIN          (channel)
@@ -21,10 +20,10 @@
 - ✅ NAMES         (channel)
 - ✅ TOPIC         (channel)
 - 🚧 INVITE        (channel)
-- 🚧 KICK          (channel)
--   🚧 PRIVMSG       (message)
-- 🚧 NOTICE        (message)
-- 🚧 MODE          (channel)
+- ✅ KICK          (channel)
+- ✅ PRIVMSG       (message)
+- ✅ NOTICE        (message)
+-   🚧 MODE          (channel)
 
 ✅ <!-- class Chanel  -->
 +o : accorder l'opérateur de chaîne à un utilisateur
@@ -56,9 +55,9 @@
 
 Codes d'envoi de messages
 Réponses et messages d'erreur
-Message du QUIT
 Mode -i pour INVITE
-PASS, NICK puis USER
 User : get and update nickname
-Notice et Privmsg : gérer les multiples destinataires
-PASS avec ctrl + D
+✅ Message du QUIT
+✅ PASS, NICK puis USER
+✅ Notice et Privmsg : gérer les multiples destinataires
+✅ PASS avec ctrl + D

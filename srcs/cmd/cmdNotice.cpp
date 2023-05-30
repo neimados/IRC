@@ -6,14 +6,14 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:10:01 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 20:36:33 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/Server.hpp"
 #include "../../inc/Messages.hpp"
 
-void sendNotice(std::string sender, std::string dest, std::string msg, std::vector<User> users) {
+static void sendNotice(std::string sender, std::string dest, std::string msg, std::vector<User> users) {
     if (msg.size() == 0 || dest.size() == 0 || sender.size() == 0)
         return;
     
@@ -42,17 +42,13 @@ void Server::cmdNotice(User *user, std::string cmd) {
 
     // Check if empty
     if (cmd.empty()) {
-        // user->sendToUser(ERR_NEEDMOREPARAMS(user->getNickname()));
         std::cout << RED << BOLD << "Invalid NOTICE message : empty." << RESET << std::endl << std::endl;
         return;
     }
     
     // Check for message
 	msg_start = cmd.find_first_of(":");
-	if (msg_start == std::string::npos) {        
-        // Sending ERR_NOTEXTTOSEND
-        // user->sendToUser(ERR_NOTEXTTOSEND(user->getNickname()));
-
+	if (msg_start == std::string::npos) {
 		std::cout << RED << BOLD << "Invalid NOTICE message : no text to send." << RESET << std::endl << std::endl;
 		return;
 	}
@@ -62,10 +58,7 @@ void Server::cmdNotice(User *user, std::string cmd) {
 	
     // Check for destinataires
     if (cmd.find_first_of(" ") == std::string::npos){
-        // Sending ERR_NORECIPIENT
-        // user->sendToUser(ERR_NORECIPIENT(user->getNickname(), "PRIVMSG"));
-
-		std::cout << RED << BOLD << "Invalid NOTICE message." << RESET << std::endl << std::endl;
+        std::cout << RED << BOLD << "Invalid NOTICE message." << RESET << std::endl << std::endl;
 		return;
 	}
 
@@ -87,10 +80,12 @@ void Server::cmdNotice(User *user, std::string cmd) {
 	destinataires.push_back(cmd);
 	std::cout << "FROM :" << CYAN << BOLD << user->getNickname() << RESET << std::endl;
     std::cout << "TO   :";
+	
     for (size_t i = 0; i < destinataires.size(); i++)
         std::cout << CYAN << BOLD << destinataires[i] << RESET << " ";
+
     std::cout << std::endl;
-    std::cout << "MSG  :" << CYAN << BOLD << msg << RESET << std::endl << std::endl;
+    std::cout << "MSG  :" << CYAN << BOLD << msg << RESET << std::endl;
 		
 	size_t i = 0;
 
@@ -102,8 +97,6 @@ void Server::cmdNotice(User *user, std::string cmd) {
 
             // Check if the channel exists
 			if (chan_index == -1) {
-				// Send the error message to the user
-				// sendToUser(user, ERR_NOSUCHCHANNEL(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "Channel " << destinataires[i] << " doesn't exist." << RESET << std::endl << std::endl;
 				continue;
 			}
@@ -114,22 +107,19 @@ void Server::cmdNotice(User *user, std::string cmd) {
 				&& _channels[chan_index].isOperator(user) == false
 				&& _channels[chan_index].isVoiced(user) == false
 			) {
-				// Send the error message to the user
-                // user->sendToUser(ERR_CANNOTSENDTOCHAN(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "Channel " << destinataires[i] << " is moderated." << RESET << std::endl << std::endl;
 				continue;
 			}
 
 			// Check if the user is in the channel or if the user is an operator or a voiced user
 			if (!_channels[chan_index].getExternalMessage() && !_channels[chan_index].isInChannel(user)) {
-                // user->sendToUser(ERR_NOTONCHANNEL(user->getNickname(), destinataires[i]));
-				std::cout << RED << BOLD << "User " << user->getNickname() << " is not in the channel " << destinataires[i] << " without external messages." << RESET << std::endl << std::endl;
+                std::cout << RED << BOLD << "User " << user->getNickname() << " is not in the channel " << destinataires[i] << " without external messages." << RESET << std::endl << std::endl;
 				continue;
 			}
     
 			// Send the message to the channel
 			sendNotice(user->getNickname(), destinataires[i], msg, _channels[chan_index].getUsers());
-			std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
+			std::cout << GREEN << BOLD << user->getNickname() << " sent a notice `" << msg << "` to " << destinataires[i] << RESET << std::endl << std::endl;
 		}
 		else {
 			// Destinataires[i] is a username
@@ -137,14 +127,13 @@ void Server::cmdNotice(User *user, std::string cmd) {
 
             // User doesn't exist
 			if (user_index == -1) {
-				// sendToUser(user, ERR_NOSUCHNICK(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "User " << destinataires[i] << " doesn't exist." << RESET << std::endl << std::endl;
                 continue;
 			}
             
             // Send the message to the user
             _usrs[user_index].sendToUser(RPL_NOTICE(user->getNickname(), destinataires[i], msg));
-            std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
+            std::cout << GREEN << BOLD << user->getNickname() << " sent a notice `" << msg << "` to " << destinataires[i] << RESET << std::endl << std::endl;
 		}
     }
 }

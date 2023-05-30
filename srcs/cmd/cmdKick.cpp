@@ -2,7 +2,9 @@
 #include "../../inc/Messages.hpp"
 
 void Server::cmdKick(User *user, std::string cmd) {
-	cmd.erase(0, 5); // Remove the "KICK " part of the command
+	// Remove the "KICK " part of the command
+	cmd.erase(0, 5);
+
 	// Split the command into 3 parts
 	std::string username;
 	std::string channel;
@@ -42,11 +44,7 @@ void Server::cmdKick(User *user, std::string cmd) {
 
 	if (!user->isInChan(channel)) {
 		// Send the error message to the user
-		if (user->getisInChannel() == false)
-			sendToUser(user, "Error: you are not in channel " + channel + ".");
-		else
-			sendToUserInChan(user, "404", channel, " you are not allowed to kick " + username + " from " + channel + ".");
-		
+		user->sendToUser(ERR_NOTONCHANNEL(user->getNickname(), channel));
 		std::cout << RED << BOLD << "User " << user->getNickname() << " is not in channel " << channel << "." << RESET << std::endl << std::endl;
 		return;
 	}
@@ -56,17 +54,15 @@ void Server::cmdKick(User *user, std::string cmd) {
 	
 	if (chan_index == -1) {
 		// Send the error message to the user
-		if (user->getisInChannel() == false)
-			sendToUser(user, "Error: channel " + channel + " doesn't exist.");
-		else
-			sendToUserInChan(user, "404", channel, " channel " + channel + " doesn't exist.");
-
+		user->sendToUser(ERR_NOSUCHCHANNEL(user->getNickname(), channel));
 		std::cout << RED << BOLD << "Channel doesn't exist." << RESET << std::endl << std::endl;
 		return;
 	}
 
 	//if user is not an operator
-	if (_channels[chan_index].isOperator(user) == false){
+	if (_channels[chan_index].isOperator(user) == false) {
+		// Send the error message to the user
+		user->sendToUser(ERR_CHANOPRIVSNEEDED(user->getNickname(), channel));
 		std::cout << RED << BOLD << "Only operators can kick user." << RESET << std::endl << std::endl;
 		return;
 	}
@@ -75,33 +71,36 @@ void Server::cmdKick(User *user, std::string cmd) {
 	// Check if the user exists with a loop
 	for (size_t i = 0; i < _usrs.size(); i++) {
 		if (_usrs[i].getNickname() == username) {
-			// Send the KICK message to the user
-			if (_usrs[i].getisInChannel() == false || !_usrs[i].isInChan(channel)) {
-				sendToUser(user, "Error: user " + username + " is not in the channel " + channel + ".");
+			// Check if the user is in the channel
+			if (!_usrs[i].isInChan(channel)) {
+				// Send the error message to the user
+				user->sendToUser(ERR_USERNOTINCHANNEL(user->getNickname(), username, channel));
 				std::cout << RED << BOLD << "User " << username << " is not in the channel " << channel << "." << RESET << std::endl << std::endl;
-			} else {
-				sendAllUsersInChan(channel, user->getNickname() + " KICK " + channel + " " + username + " :" + reason);
-				sendToUser(&_usrs[i], user->getNickname() + " KICK " + channel + " " + username + " :" + reason);
-	
-				// Remove the user from the channel
-				_channels[chan_index].delUsr(&_usrs[i]);
-
-				// Remove privileges
-				_channels[chan_index].delOperator(user, user);
-				_channels[chan_index].delVoiced(user, user);
-			
-				_usrs[i].delChannel(_channels[chan_index].getName());
-				
-				// Send the NAMES message to the user
-				cmdNames(user, channel);
-				
-				std::cout << GREEN << BOLD << user->getNickname() << " kicked " << username << " from " << channel << RESET << std::endl << std::endl;
+				return;
 			}
+
+			// Send to all channel users
+			for (size_t j = 0; j < _channels[chan_index].getUsers().size(); j++) {
+				_channels[chan_index].getUsers()[j].sendToUser(RPL_KICK(user->getNickname(), channel, username, reason));
+			}
+
+			// Remove privileges
+			_channels[chan_index].delOperator(&_usrs[i], user);
+			_channels[chan_index].delVoiced(&_usrs[i], user);
+
+			// Remove the user from the channel
+			_channels[chan_index].delUsr(&_usrs[i]);
+			_usrs[i].delChannel(_channels[chan_index].getName());
+			
+			// Send the NAMES message to the user
+			cmdNames(user, "NAMES " + channel);
+	
+			std::cout << GREEN << BOLD << user->getNickname() << " kicked " << username << " from " << channel << RESET << std::endl << std::endl;
 			return;
 		}
 	}
 
 	// Send the error message to the user
-	sendToUser(user, "Error: user " + username + " doesn't exist.");
+	user->sendToUser(ERR_NOSUCHNICK(user->getNickname(), username));
 	std::cout << RED << BOLD << "User " << username << " doesn't exist." << RESET << std::endl << std::endl;
 }

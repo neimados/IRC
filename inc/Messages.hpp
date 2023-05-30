@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:48:22 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:19:13 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 19:34:48 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,3 +82,13 @@ std::string ERR_TOOMANYTARGETS(std::string nickname, std::string message);
 
 // NOTICE
 std::string RPL_NOTICE(std::string nickname, std::string channel, std::string message);
+
+// MODE
+std::string RPL_CHANNELMODEIS(std::string nickname, std::string channel, std::string mode);
+
+std::string ERR_USERNOTINCHANNEL(std::string nickname, std::string user, std::string channel);
+std::string ERR_UNKNOWNMODE(std::string nickname, std::string mode);
+std::string ERR_USERSDONTMATCH(std::string nickname);
+
+// KICK
+std::string RPL_KICK(std::string nickname, std::string channel, std::string user, std::string message);

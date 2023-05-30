@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:06:04 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 20:29:55 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -306,7 +306,8 @@ void Server::execCmd(User *user, std::string cmd, int fd) {
 	} else if (cmd.substr(0, 3) == "CAP") {
 		std::cout << "Command CAP received from " << BOLD << user->getNickname() << RESET << std::endl;
 	} else if (cmd.substr(0, 4) == "PING") {
-		this->cmdPing(user, cmd);
+		// this->cmdPing(user, cmd);
+		std::cout << "Command PING received from " << BOLD << user->getNickname() << RESET << std::endl;
 	} else if (cmd.substr(0, 4) == "LIST") {
 		this->cmdList(user, cmd);
 	} else if (cmd.substr(0, 4) == "QUIT") {
@@ -368,36 +369,6 @@ void Server::sendAllUsersInChan(std::string chan, std::string msg) {
 	}
 }
 
-void Server::sendPrivMsgInChan(std::string chan, std::string msg, std::string user) {
-	// Sending a message to all users in a channel
-	std::vector<User>::iterator it;
-	
-	for (it = _usrs.begin(); it != _usrs.end(); it++) {
-		if (it->isInChan(chan) && it->getNickname() != user) {
-			sendUserInChan(&(*it), msg);
-		}
-	}
-}
-
-void Server::sendToUserInChan(User *user, std::string code, std::string chan, std::string msg) {
-	// Sending a message to a user while he is in a channel with a custom code
-	std::string start = ":IRC ";
-	start += code;
-	start += " ";
-	start += user->getNickname();
-	start += " ";
-	start += chan;
-	start += " :";
-	
-	msg = start + msg + "\n\r";
-	
-	const void *cmsg = msg.c_str();
-
-	if (user->getVerification()) {
-		send(user->getFd(), cmsg, msg.size(), 0);
-	}
-}
-
 /* ===== UTILS ===== */
 
 int Server::findChan(std::string const name) const {
@@ -453,128 +424,6 @@ std::string Server::getPassword() const {
 
 
 /* ===== COMMANDS ===== */
-
-void Server::cmdPing(User *user, std::string cmd) {
-	std::string address = "";
-	if (cmd.size() > 5)
-		address = cmd.substr(5);
-		
-	std::cout << CYAN << "Sending PONG to address : " << ORANGE << BOLD << address << RESET << NORMAL << std::endl;
-	sendToUser(user, "PONG");
-}
-
-// void Server::cmdPrivmsg(User *user, std::string cmd) {
-// 	std::string msg;
-// 	std::string::size_type msg_start;
-	
-// 	cmd.erase(0, 8);
-// 	msg_start = cmd.find_first_of(":");
-	
-// 	if (msg_start == std::string::npos) {
-// 		std::cout << RED << BOLD << "Invalid PRIVMSG message." << RESET << std::endl << std::endl;
-// 		return;
-// 	}
-
-// 	msg = cmd.substr(msg_start + 1, cmd.size());
-	
-// 	if (cmd.find_first_of(" ") == std::string::npos){
-// 		std::cout << RED << BOLD << "Invalid PRIVMSG message." << RESET << std::endl << std::endl;
-// 		return;
-// 	}
-
-// 	//looking for the " " before the ":", cutting to have juste the list of destinaters separeted with ","
-// 	cmd.erase(cmd.find_first_of(" "), cmd.size());;
-// 	std::vector<std::string> destinataires;
-// 	std::string delimiter = ",";
-// 	size_t pos = 0;
-// 	std::string token;
-// 	//split cmd (there is only the list of destinataires at this point) string with the delimiter "," and putting it in the vector destinataires
-// 	while ((pos = cmd.find(delimiter)) != std::string::npos) {
-// 	    token = cmd.substr(0, pos);
-// 	    destinataires.push_back(token);
-// 	    cmd.erase(0, pos + delimiter.length());
-// 	};
-// 	destinataires.push_back(cmd);
-// 	std::cout << CYAN << "Command PRIVMSG received from " << BOLD << user->getNickname() << RESET << " with message: " << ITALIC << msg << RESET << std::endl;
-		
-
-// 	// ****************************************usless to Gok ***************************** ///
-// 	// Get the channel name or username
-// 	// std::string destinataire;
-// 	// std::string::size_type destinataire_start = cmd.find_first_of("#");
-	
-// 	// if (destinataire_start != std::string::npos) {
-// 	// 	// destinataire is a channel
-// 	// 	destinataire = clearString(cmd.substr(destinataire_start, msg_start - destinataire_start - 1));
-// 	// } else {
-// 	// 	// destinataire is a username
-// 	// 	destinataire = clearString(cmd.substr(0, msg_start));
-// 	// }
-// 	// Check if the destinataire is a channel or a username
-// 	// ****************************************end************************************** ///
-	
-// 	size_t i = 0;
-
-// 	// checking all the strings in the vector destinataires if it's a channel or a user
-// 	while (i < destinataires.size())
-// 	{
-// 		if (destinataires[i][0] == '#')
-// 		{
-// 			// destinataires[i] is a channel
-// 			int chan_index = findChan(destinataires[i]);
-
-// 			// Check if the channel is moderated and if the user is not an operator or a voiced user
-			
-// 			if (chan_index == -1) {
-// 				// Send the error message to the user
-// 				sendToUser(user, ERR_NOSUCHCHANNEL(user->getNickname(), destinataires[i]));
-// 				std::cout << RED << BOLD << "Channel " << destinataires[i] << " doesn't exist." << RESET << std::endl << std::endl;
-// 				continue;
-// 			}
-// 			if (
-// 				_channels[chan_index].getIsModerated() == true
-// 				&& _channels[chan_index].isOperator(user) == false
-// 				&& _channels[chan_index].isVoiced(user) == false
-// 			) {
-// 				// Send the error message to the user
-// 				sendToUserInChan(user, "404", destinataires[i], "Channel is moderated.");
-// 				std::cout << RED << BOLD << "Channel " << destinataires[i] << " is moderated." << RESET << std::endl << std::endl;
-// 				return;
-// 			}
-
-// 			// Check if the user is in the channel or if the user is an operator or a voiced user
-// 			if (_channels[chan_index].getExternalMessage() == false && _channels[chan_index].isInChannel(user) == false)
-// 			{
-// 				// Send the error message to the user
-// 				if (!user->isInChan(destinataires[i]))
-// 					sendToUserInChan(user, "404", destinataires[i], "You're not in the channel " + destinataires[i] + ".");
-// 				else
-// 					sendToUser(user, "Error: you're not in the channel " + destinataires[i] + ".");
-// 				std::cout << RED << BOLD << "User " << user->getNickname() << " is not in the channel " << destinataires[i] << " without external messages." << RESET << std::endl << std::endl;
-// 				return;
-// 			}
-// 			// Send the message to the channel
-// 			sendPrivMsgInChan(destinataires[i], user->getNickname() + " PRIVMSG " + destinataires[i] + " :" + msg, user->getNickname());
-// 			std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
-// 		}
-// 		else
-// 		{
-// 			// destinataires[i] is a username
-// 			int user_index = findUser(destinataires[i]);
-
-// 			if (user_index == -1) {
-// 				// Send the error message to the user
-// 				sendToUser(user, ERR_NOSUCHNICK(user->getNickname(), destinataires[i]));
-// 				std::cout << RED << BOLD << "User " << destinataires[i] << " doesn't exist." << RESET << std::endl << std::endl;
-// 			} else {
-// 				// Send the message to the user
-// 				sendToUser(&(_usrs[user_index]), user->getNickname() + " PRIVMSG " + destinataires[i] + " :" + msg);
-// 				std::cout << GREEN << BOLD << user->getNickname() << " sent a message to " << destinataires[i] << RESET << std::endl << std::endl;
-// 			}
-// 		}
-// 		i++;
-// 	}
-// }
 
 void Server::cmdInvite(User *user, std::string cmd) {
 	// Get username and channel name from the command : "INVITE User_5 #nope"
@@ -634,93 +483,6 @@ void Server::cmdInvite(User *user, std::string cmd) {
 	sendToUser(user, "Error: user " + username + " doesn't exist.");
 	std::cout << RED << BOLD << "User " << username << " doesn't exist." << RESET << std::endl << std::endl;
 }
-
-// void Server::cmdNotice(User *user, std::string cmd) {
-// 	// Format of the command : "NOTICE #no :er" or "NOTICE User_5 :er"
-// 	std::string msg;
-// 	std::string::size_type msg_start;
-	
-// 	cmd.erase(0, 7);
-
-// 	msg_start = cmd.find_first_of(":");
-	
-// 	if (msg_start == std::string::npos) {
-// 		std::cout << RED << BOLD << "Invalid NOTICE message." << RESET << std::endl << std::endl;
-// 		return;
-// 	}
-
-// 	msg = cmd.substr(msg_start + 1, cmd.size());
-	
-// 	std::cout << CYAN << "Command NOTICE received from " << BOLD << user->getNickname() << RESET << " with message: " << ITALIC << msg << RESET << std::endl;
-
-// 	// Get the channel name or username
-// 	std::string destinataire;
-// 	std::string::size_type destinataire_start = cmd.find_first_of("#");
-	
-// 	if (destinataire_start != std::string::npos) {
-// 		// destinataire is a channel
-// 		destinataire = clearString(cmd.substr(destinataire_start, msg_start - destinataire_start - 1));
-// 	} else {
-// 		// destinataire is a username
-// 		destinataire = clearString(cmd.substr(0, msg_start));
-// 	}
-
-// 	// Check if the destinataire is a channel or a username
-// 	if (destinataire[0] == '#') {
-// 		// destinataire is a channel
-// 		int chan_index = findChan(destinataire);
-
-
-// 		// Check if the channel is moderated and if the user is not an operator or a voiced user
-// 		if (
-// 			_channels[chan_index].getIsModerated() == true
-// 			&& _channels[chan_index].isOperator(user) == false
-// 			&& _channels[chan_index].isVoiced(user) == false
-// 		) {
-// 			// Send the error message to the user
-// 			sendToUserInChan(user, "404", destinataire, "Channel is moderated.");
-// 			std::cout << RED << BOLD << "Channel " << destinataire << " is moderated." << RESET << std::endl << std::endl;
-// 			return;
-// 		}
-		
-// 		if (chan_index == -1) {
-// 			// Send the error message to the user
-// 			sendToUser(user, "Error: channel " + destinataire + " doesn't exist.");
-
-// 			std::cout << RED << BOLD << "Channel " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;
-// 		} else {
-
-// 			// Check if the user is in the channel or if the user is an operator or a voiced user
-// 			if (_channels[chan_index].getExternalMessage() == false && _channels[chan_index].isInChannel(user) == false) {
-// 				// Send the error message to the user
-// 				if (user->getisInChannel() == false)
-// 					sendToUserInChan(user, "404", destinataire, "You're not in the channel " + destinataire + ".");
-// 				else
-// 					sendToUser(user, "Error: you're not in the channel " + destinataire + ".");
-// 				std::cout << RED << BOLD << "User " << user->getNickname() << " is not in the channel " << destinataire << " without external messages." << RESET << std::endl << std::endl;
-// 				return;
-// 			}
-			
-// 			// Send the NOTICE message to the users
-// 			sendAllUsersInChan(destinataire, user->getNickname() + " NOTICE " + destinataire + " :" + msg);
-// 			std::cout << GREEN << BOLD << user->getNickname() << " sent a notice to " << destinataire << RESET << std::endl << std::endl;
-// 		}
-// 	} else {
-// 		// destinataire is a username
-// 		for (size_t i = 0; i < _usrs.size(); i++) {
-// 			if (_usrs[i].getNickname() == destinataire) {
-// 				// Send the NOTICE message to the user
-// 				sendToUser(&_usrs[i], user->getNickname() + " NOTICE " + destinataire + " :" + msg);
-// 				std::cout << GREEN << BOLD << user->getNickname() << " sent a notice to " << destinataire << RESET << std::endl << std::endl;
-// 				return;
-// 			}
-// 		}
-
-// 		// Send the error message to the user
-// 		sendToUser(user, "Error: user " + destinataire + " doesn't exist.");
-// 		std::cout << RED << BOLD << "User " << destinataire << " doesn't exist." << RESET << std::endl << std::endl;
-// 	}
-// }
 
 void Server::cmdMode(User *user, std::string cmd) {
 	cmd.erase(0, 5); // Remove the "MODE " part of the command
