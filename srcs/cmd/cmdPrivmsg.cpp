@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/30 20:39:35 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 22:49:41 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,11 +128,11 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 		
 	size_t i = 0;
 
-	//check duplicates
+	// check duplicates
 	for (size_t j = 0; j < destinataires.size(); j++) {
 		for (size_t k = 0; k < destinataires.size(); k++) {
 			if (destinataires[j] == destinataires[k] && j != k) {
-				sendToUser(user, ERR_TOOMANYTARGETS(user->getNickname(), destinataires[i]));
+				user->sendToUser(ERR_TOOMANYTARGETS(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "Duplicate recipients." << RESET << std::endl << std::endl;
 				return;
 			}
@@ -148,7 +148,7 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
             // Check if the channel exists
 			if (chan_index == -1) {
 				// Send the error message to the user
-				sendToUser(user, ERR_CANNOTSENDTOCHAN(user->getNickname(), destinataires[i]));
+				user->sendToUser(ERR_CANNOTSENDTOCHAN(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "Channel " << destinataires[i] << " doesn't exist." << RESET << std::endl << std::endl;
 				continue;
 			}
@@ -208,7 +208,7 @@ void Server::cmdPrivmsg(User *user, std::string cmd) {
 
             // User doesn't exist
 			if (user_index == -1) {
-				sendToUser(user, ERR_NOSUCHNICK(user->getNickname(), destinataires[i]));
+				user->sendToUser(ERR_NOSUCHNICK(user->getNickname(), destinataires[i]));
 				std::cout << RED << BOLD << "User " << destinataires[i] << " doesn't exist." << RESET << std::endl << std::endl;
                 continue;
 			}

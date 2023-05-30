@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:48:22 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/30 19:34:48 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 22:45:31 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ std::string ERR_NOLOGIN (std::string nickname);
 std::string ERR_NEEDMOREPARAMS (std::string nickname);
 std::string ERR_ALREADYREGISTRED (std::string nickname);
 std::string ERR_NOTREGISTERED (std::string nickname);
+std::string ERR_UNKNOWNCOMMAND (std::string nickname);
 
 
 // NICK
@@ -85,6 +86,7 @@ std::string RPL_NOTICE(std::string nickname, std::string channel, std::string me
 
 // MODE
 std::string RPL_CHANNELMODEIS(std::string nickname, std::string channel, std::string mode);
+std::string RPL_UMODEIS(std::string nickname, std::string mode);
 
 std::string ERR_USERNOTINCHANNEL(std::string nickname, std::string user, std::string channel);
 std::string ERR_UNKNOWNMODE(std::string nickname, std::string mode);

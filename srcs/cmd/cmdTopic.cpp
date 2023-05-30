@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cmdTopic.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: guyar <guyar@student.42.fr>                +#+  +:+       +#+        */
+/*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 16:28:06 by guyar            ###   ########.fr       */
+/*   Updated: 2023/05/30 22:48:48 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,7 @@ void Server::cmdTopic(User *user, std::string cmd) {
 	std::string::size_type topic_start = cmd.find_first_of(":");
 	
 	if (channel_start == std::string::npos) {
-		// Send the error message to the user
-		sendToUser(user, "Error: missing channel name.");
-
+		user->sendToUser(ERR_NEEDMOREPARAMS(user->getNickname()));
 		std::cout << RED << BOLD << "Missing channel name." << RESET << std::endl << std::endl;
 		return;
 	}

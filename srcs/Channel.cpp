@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/30 20:03:45 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 22:20:36 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,9 +152,7 @@ std::string Channel::getModeUser(User *user) const {
         mode += "+v";
 
     if (mode == " ")
-        mode = " - ";
-    else
-        mode += " ";
+        mode = "";
 
     return mode;
 }

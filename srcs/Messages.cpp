@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 08:54:15 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/30 19:34:18 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/30 22:46:58 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,15 @@ std::string ERR_NOLOGIN (std::string nickname) {
 std::string ERR_NEEDMOREPARAMS (std::string nickname) {
     return ("461 " + nickname + " :Not enough parameters");
 }
-
 std::string ERR_ALREADYREGISTRED (std::string nickname) {
     return ("462 " + nickname + " :You may not reregister");
 }
-
 std::string ERR_NOTREGISTERED (std::string nickname) {
     return ("451 " + nickname + " :You have not registered");
 }
-
+std::string ERR_UNKNOWNCOMMAND (std::string nickname) {
+    return ("421 " + nickname + " :Unknown command");
+}
 
 // NICK
 std::string RPL_NICK (std::string oldnick, std::string newnick) {
@@ -159,6 +159,9 @@ std::string RPL_NOTICE(std::string nickname, std::string channel, std::string me
 // MODE
 std::string RPL_CHANNELMODEIS(std::string nickname, std::string channel, std::string mode) {
     return ("324 " + nickname + " " + channel + " " + mode);
+}
+std::string RPL_UMODEIS(std::string nickname, std::string mode) {
+    return ("221 " + nickname + " " + mode);
 }
 
 std::string ERR_UNKNOWNMODE(std::string nickname, std::string mode) {
