@@ -1,6 +1,18 @@
 #include "../../inc/Server.hpp"
 #include "../../inc/Messages.hpp"
 
+// Remove the \n and spaces from the channel name
+static std::string clearString(std::string str) {
+	for (size_t j = 0; j < str.size(); j++) {
+		if (str[j] == ' ' || str[j] == '\t' || str[j] == '\n' || str[j] == '\r') {
+			str.erase(j, 1);
+			j--;
+		}
+	}
+
+	return str;
+}
+
 void Server::cmdKick(User *user, std::string cmd) {
 	// Remove the "KICK " part of the command
 	cmd.erase(0, 5);

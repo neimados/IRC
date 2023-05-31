@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:19:08 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:21:22 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,6 @@ void addUserInChan(User *user, Channel &chan) {
     // NAME REPLY to user
     user->sendToUser(RPL_NAMREPLY(user->getNickname(), chan.getName(), chan.getChanUsrs()));
     user->sendToUser(RPL_ENDOFNAMES(user->getNickname(), chan.getName()));
-    
-    // chan.sendToChannel(RPL_NAMREPLY(user->getNickname(), chan.getName(), chan.getChanUsrs()));
-    // chan.sendToChannel(RPL_ENDOFNAMES(user->getNickname(), chan.getName()));
 }
 
 void Server::cmdJoin(User *user, std::string cmd) {

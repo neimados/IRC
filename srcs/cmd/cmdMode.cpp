@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/30 22:42:02 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:31:17 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,8 @@ static void parseCommand(std::string command, std::string& channel, std::string&
 }
 
 void Server::cmdMode(User *user, std::string cmd) {
-	cmd.erase(0, 5); // Remove the "MODE " part of the command
+	// Remove the "MODE " part of the command
+	cmd.erase(0, 5);
 
 	// Parse the command as follow `#channel username +v` or `#channel +t`
 	std::string channel;
@@ -76,12 +77,6 @@ void Server::cmdMode(User *user, std::string cmd) {
 	std::string mode;
 
 	parseCommand(cmd, channel, username, mode);
-
-	// PRint channel, username and mode
-	std::cout << "Channel  : " << channel << std::endl;
-	std::cout << "Username : " << username << std::endl;
-	std::cout << "Mode     : " << mode << std::endl;
-	
 
 	// Copy the user to keep sender information
 	User *sender = user;
@@ -122,11 +117,13 @@ void Server::cmdMode(User *user, std::string cmd) {
 			
 			// Send user mode on server : no particular mode
 			user->sendToUser(RPL_UMODEIS(username, ""));
+			std::cout << GREEN << BOLD << "User " << username << " has no mode." << RESET << std::endl << std::endl;
 			return;
 		}
 			
 		// Send the MODE message to the users
 		user->sendToUser(RPL_CHANNELMODEIS(user->getNickname(), channel, _channels[chan_index].getMode()));
+		std::cout << GREEN << BOLD << "Channel `" << channel << "` has mode `" << _channels[chan_index].getMode() << "`." << RESET << std::endl << std::endl;	
 		return;
 	}
 
@@ -230,5 +227,6 @@ void Server::cmdMode(User *user, std::string cmd) {
 		}
 		
 		sendNewModes(user->getNickname(), RPL_CHANNELMODEIS(user->getNickname(), channel, _channels[chan_index].getMode()), _channels[chan_index].getUsers());
+		std::cout << GREEN << BOLD << "Mode changed." << RESET << std::endl << std::endl;
 	}
 }

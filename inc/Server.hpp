@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:09 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/30 22:47:58 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:20:45 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,6 @@ public:
 	Server(int port, std::string password);
 	~Server();
 
-	// Define const server name cpp 98
-	std::string SERVER_NAME;
-
 	/* ===== BASICS ===== */
 	void	startSrv();
 	void	addUser();
@@ -74,24 +71,13 @@ public:
 	void	disconnectUser(User *user, int fd);
 	void	execCmd(User *user, std::string cmd, int fd);
 	
-	void	sendUserInChan(User *user, std::string chan);
-	void	sendAllUsersInChan(std::string chan, std::string msg);
-	
 	/* ===== UTILS ===== */
 	int findChan(std::string const name) const;
 	int findUser(std::string const name) const;
-	
-	Channel	*getChannel(std::string const name);
-	std::string	clearString(std::string str);
-
 
 	/* ===== GETTERS ===== */
-	User	*getUser(int fd);
-	
-	int	getNumberUsers() const;
-
+	User		*getUser(int fd);
 	std::string	getPassword() const;
-
 
 	/* ===== COMMANDS ===== */
 	void cmdList(User *user, std::string cmd);
@@ -107,7 +93,6 @@ public:
 	void cmdPrivmsg(User *user, std::string cmd);
 	void cmdNotice(User *user, std::string cmd);
 	void cmdMode(User *user, std::string cmd);
-	
 
 	/* ===== ERRORS ===== */
 	class SrvError : public std::exception {
@@ -126,13 +111,13 @@ private:
 	Server &operator= (Server const &srv);
 
 	std::vector<pollfd>		_fds;
-	int								_fdSrv;
-	int								_port;
-	int								_nbUsers;
+	int						_fdSrv;
+	int						_port;
+	int						_nbUsers;
 	std::string				_Port;
 	std::string				_password;
 	std::vector<User>		_usrs;
 	std::vector<Channel>	_channels;
 
-	static const int								_maxFds = 10;
+	static const int		_maxFds = 10;
 };

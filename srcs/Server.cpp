@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/30 22:47:49 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:20:36 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,6 @@ Server::Server(int port, std::string password) {
 		_fds.push_back(pollfd());
 	}
 
-	SERVER_NAME = "ft_irc";
-
-	// _fds = new struct pollfd[10];
 	_fdSrv = 0;
 	_nbUsers = 1;
 	_port = port;
@@ -70,20 +67,6 @@ Server::Server(int port, std::string password) {
 
 Server::~Server(){	
 	close(_fdSrv);
-}
-
-/* ===== Annexes ===== */
-
-// Remove the \n and spaces from the channel name
-std::string Server::clearString(std::string str) {
-	for (size_t j = 0; j < str.size(); j++) {
-		if (str[j] == ' ' || str[j] == '\t' || str[j] == '\n' || str[j] == '\r') {
-			str.erase(j, 1);
-			j--;
-		}
-	}
-
-	return str;
 }
 
 /* ===== BASICS ===== */
@@ -306,7 +289,6 @@ void Server::execCmd(User *user, std::string cmd, int fd) {
 	} else if (cmd.substr(0, 3) == "CAP") {
 		std::cout << "Command CAP received from " << BOLD << user->getNickname() << RESET << std::endl;
 	} else if (cmd.substr(0, 4) == "PING") {
-		// this->cmdPing(user, cmd);
 		std::cout << "Command PING received from " << BOLD << user->getNickname() << RESET << std::endl;
 	} else if (cmd.substr(0, 4) == "LIST") {
 		this->cmdList(user, cmd);
@@ -334,24 +316,6 @@ void Server::execCmd(User *user, std::string cmd, int fd) {
 	}
 }
 
-void Server::sendUserInChan(User *user, std::string chan) {
-	// Sending a message to a user while he is in a channel
-	std::string msg = ":" + chan + "\n\r";
-
-	send(user->getFd(), msg.c_str(), msg.length(), 0);
-}
-
-void Server::sendAllUsersInChan(std::string chan, std::string msg) {
-	// Sending a message to all users in a channel
-	std::vector<User>::iterator it;
-	
-	for (it = _usrs.begin(); it != _usrs.end(); it++) {
-		if (it->isInChan(chan)) {
-			sendUserInChan(&(*it), msg);
-		}
-	}
-}
-
 /* ===== UTILS ===== */
 
 int Server::findChan(std::string const name) const {
@@ -371,19 +335,6 @@ int Server::findUser(std::string const name) const {
 	return -1;
 }
 
-Channel* Server::getChannel(std::string const name) {
-	Channel *tmp = NULL;
-	if (name[0] != '#')
-		return tmp;
-	
-	// Search and return a channel by its name
-	for (size_t i = 0; i < _channels.size(); i++) {
-		if (_channels[i].getName() == name)
-			return &_channels[i];
-	}
-	return tmp;
-}
-
 /* ===== GETTERS ===== */
 User *Server::getUser(int fd) {
 	std::vector<User>::iterator it;
@@ -395,10 +346,6 @@ User *Server::getUser(int fd) {
 		it++;
 	}
 	return NULL;
-}
-
-int Server::getNumberUsers() const {
-	return _usrs.size();
 }
 
 std::string Server::getPassword() const {

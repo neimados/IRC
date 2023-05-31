@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/24 16:04:04 by guyar             #+#    #+#             */
-/*   Updated: 2023/05/30 22:20:36 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:21:56 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,18 +31,6 @@ std::string Channel::getName() const {
 
 std::vector<User> Channel::getUsers() {
     return this->_usrs;
-}
-
-void Channel::sendToChannel(std::string msg, User *sender) {
-    // Parcours du vecteur de User
-    for (size_t i = 0; i < this->_usrs.size(); i++)
-    {
-        if (this->_usrs[i].getFd() != sender->getFd())
-        {
-            // Send the message to the channel
-            this->_usrs[i].sendToUser(msg);
-        }
-    }
 }
 
 void Channel::sendToChannel(std::string msg) {

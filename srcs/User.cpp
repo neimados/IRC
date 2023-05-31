@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 22:50:13 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:19:49 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:16:54 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,20 +50,11 @@ void    User::sendToUser(std::string message) {
 }
 
 // Getters
-std::string User::getUsername() const {
-    return this->_username;
-}
-// std::string User::getRealname() const {
-//     return this->_realname;
-// }
 std::string User::getNickname() const {
     return this->_nickname;
 }
 std::string User::getPassword() const {
     return this->_password;
-}
-std::string User::getHostname() const {
-    return this->_hostname;
 }
 std::string User::getBuffer() const {
     return this->_cmdBuffer;
@@ -81,26 +72,12 @@ bool    User::getVerification() {
 bool    User::getUserVerification() {
     return this->userIsVerified;
 }
-bool    User::getChannelVerification() {
-    return this->isInChannel;
-}
 bool    User::getPassOk() {
     return this->passOk;
 }
 bool   User::getIsRegistered() {
     return this->isRegistered;
 }
-
-pollfd  User::getPollFd() {
-    return this->_client;
-}
-bool     User::getisInChannel() {
-    return this->isInChannel;
-}
-
-// std::string User::getWhatChannel() const {
-//     return this->whatChannel;
-// }
 
 // Setters
 void    User::setNickname(std::string nickname) {
@@ -112,28 +89,13 @@ void    User::setPassword(std::string password) {
 void    User::setUsername(std::string username) {
     this->_username = username;
 }
-// void    User::setRealname(std::string realname) {
-//     this->_realname = realname;
-// }
-void    User::setPort(int fd) {
-    this->_fd = fd;
-}
 void    User::setVerification(bool type) {
     this->isVerified = type;
 }
 void    User::setUserVerification(bool type) {
     this->userIsVerified = type;
 }
-void    User::setChannelVerification(bool type) {
-    this->isInChannel = type;
-}
-void    User::setisInChannel(int n) {
-    this->isInChannel = n;
-}
-// void    User::setWhatChannel(std::string channelName) {
-//     this->whatChannel = channelName;
-// }
-void    User::setPassOk(int ok) {
+void    User::setPassOk(bool ok) {
     this->passOk = ok;
 }
 void    User::setHostname(std::string hostname) {
