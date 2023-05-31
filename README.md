@@ -52,10 +52,8 @@
 
 ## À corriger
 
-Codes d'envoi de messages
-Réponses et messages d'erreur
-Mode -i pour INVITE
-User : get and update nickname
+🚧 User : get and update nickname
+✅ Réponses et messages d'erreur
 ✅ Message du QUIT
 ✅ PASS, NICK puis USER
 ✅ Notice et Privmsg : gérer les multiples destinataires
