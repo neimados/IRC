@@ -6,12 +6,24 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/26 13:18:05 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/06/01 09:00:14 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../inc/Server.hpp"
 #include "../../inc/Messages.hpp"
+
+static std::vector<std::string> splitCommand(const std::string& command) {
+    std::vector<std::string> words;
+    std::istringstream iss(command);
+    std::string word;
+    
+    while (iss >> word) {
+        words.push_back(word);
+    }
+    
+    return words;
+}
 
 void Server::cmdUser(User *user, std::string cmd) {
 	// Remove USER from cmd
@@ -32,40 +44,30 @@ void Server::cmdUser(User *user, std::string cmd) {
         std::cerr << RED << "User is already registred." << RESET << std::endl << std::endl;
         return ;
     }
-
-    // Get <username> <hostname> <servername> :<realname>
-    std::string username = cmd.substr(0, cmd.find(" "));
-    cmd.erase(0, cmd.find(" ") + 1);
     
-    std::string hostname = cmd.substr(0, cmd.find(" "));
-    cmd.erase(0, cmd.find(" ") + 1);
-
-    std::string servername = cmd.substr(0, cmd.find(" "));
-    cmd.erase(0, cmd.find(" ") + 1);
-
-    std::string realname = cmd;
-
-    // If realname starts with ':', remove it
-    if (realname[0] == ':')
-        realname.erase(0, 1);
+    // Count words
+    std::vector<std::string> words = splitCommand(cmd);
 
     // Check if username, hostname, servername or realname is empty
-    if (username == "" || hostname == "" || servername == "" || realname == "") {
+    if (words.size() != 4) {
         user->sendToUser(ERR_NEEDMOREPARAMS("USER"));
         std::cerr << RED << "Username, hostname, servername or realname is empty." << RESET << std::endl << std::endl;
         return ;
     }
+
+    // If realname starts with ':', remove it
+    if (words[3][0] == ':')
+        words[3].erase(0, 1);
     
     // Print infos
-    std::cout << CYAN << ITALIC << "Username: " << username << RESET << NORMAL << std::endl;
-	std::cout << CYAN << ITALIC << "Hostname: " << hostname << RESET << NORMAL << std::endl;
-	std::cout << CYAN << ITALIC << "Servername: " << servername << RESET << NORMAL << std::endl;
-	std::cout << CYAN << ITALIC << "Realname: " << realname << RESET << NORMAL << std::endl << std::endl;
+    std::cout << CYAN << ITALIC << "Username: " << words[0] << RESET << NORMAL << std::endl;
+	std::cout << CYAN << ITALIC << "Hostname: " << words[1] << RESET << NORMAL << std::endl;
+	std::cout << CYAN << ITALIC << "Servername: " << words[2] << RESET << NORMAL << std::endl;
+	std::cout << CYAN << ITALIC << "Realname: " << words[3] << RESET << NORMAL << std::endl << std::endl;
 	
     // Set infos
-    user->setUsername(username);
-    user->setHostname(hostname);
-    // user->setRealname(realname);
+    user->setUsername(words[0]);
+    user->setHostname(words[1]);
 
     // Set isRegistered to true
     user->setUserVerification(true);
@@ -79,7 +81,7 @@ void Server::cmdUser(User *user, std::string cmd) {
     // Check if user is in a channel
     if (user->getAllChans().size() != 0) {
         for (std::vector<Channel>::iterator it = this->_channels.begin(); it != this->_channels.end(); ++it) {
-            if (!user->isInChan(it->getName())) {
+            if (user->isInChan(it->getName())) {
                 it->updateUser(user);
                 break ;
             }

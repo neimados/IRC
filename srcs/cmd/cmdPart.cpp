@@ -6,7 +6,7 @@
 /*   By: dvergobb <dvergobb@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/14 17:53:06 by dvergobb          #+#    #+#             */
-/*   Updated: 2023/05/25 10:53:31 by dvergobb         ###   ########.fr       */
+/*   Updated: 2023/06/01 09:35:44 by dvergobb         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,42 @@ void Server::cmdPart(User* user, std::string cmd) {
         // Remove chan in user's list
         user->delChannel(_channels[chanIndex].getName());
 
+        // Remove operator and voiced privilege
+        _channels[chanIndex].delOperator(user, user);
+        _channels[chanIndex].delVoiced(user, user);
+        
         // Remove user from the channel
         _channels[chanIndex].delUsr(user);
+
+        std::vector<User> users = _channels[chanIndex].getUsers();
+
+        User *nextOp = NULL;
+        bool thereIsOp = false;
+
+        // Check if there is at least one operator in the channel
+        for (std::vector<User>::iterator it = users.begin(); it != users.end(); ++it) {
+            if (it->getNickname().empty())
+                continue;
+            
+            if (_channels[chanIndex].isOperator(&(*it))) {
+                thereIsOp = true;
+                std::cout << "User `" << it->getNickname() << "` is operator in channel `" << channelName << "`." << std::endl;
+                break;
+            }
+            
+            if (!nextOp || nextOp->getNickname().empty()) {
+                nextOp = &(*it);
+                std::cout << "Next operator is `" << nextOp->getNickname() << "`." << std::endl;
+            }
+        }
+
+        if (thereIsOp == false) {
+            // Add operator privilege to the next user in the list
+            if (nextOp != NULL) {
+                _channels[chanIndex].addOperator(nextOp, user);
+                user->sendToUser(ERR_CHANOPRIVSNEEDED(nextOp->getNickname(), channelName));
+            }
+        }
 
         // Send to message to the user and the channels
         if (!message.empty()) {
